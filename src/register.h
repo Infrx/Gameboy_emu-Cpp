@@ -41,13 +41,14 @@ public:
         uint16_t hl;     // Combined HL register (l + h)
     };
 
-    void setZeroF(uint16_t res);
-    void setSubsF(uint16_t res); // bFlag is false for 8 bit true for 16 bit
-    void setHCarryF(uint16_t res);
-    void setCarryF(uint64_t res, bool bFlags, bool borrow, bool shiftOut);
+    void setZeroF(uint32_t res);
+    void setSubsF(bool subs); // bFlag is false for 8 bit true for 16 bit
+    void setHCarryF(uint32_t res);
+    void setCarryF(uint32_t res, bool bFlags, bool borrow, bool shiftOut);
 
     //helpers
 
-    bool isHalfCarry(uint32_t res, bool bFlag);
-    bool isCarry(uint64_t res, bool bFlag);
+    bool is8bCarry(uint32_t res, bool bFlag);
+    bool is16bCarry(uint32_t res, bool bFlag);
+    bool isHalfCarry(uint32_t);
 };
