@@ -3,11 +3,13 @@
 #include <cstdint>
 #include <iostream>
 
+const uint16_t START_ADRESS = 0x0100;
+
 class Registers
 {
 public:
 
-	uint16_t pc{};
+	uint16_t pc{ START_ADRESS };
 	uint16_t sp{};
     union {
         struct {
