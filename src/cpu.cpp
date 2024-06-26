@@ -24,7 +24,10 @@ void Cpu::decodeOpcode(uint8_t opcode, uint8_t cb_opcode, bool prefixFlag)
 	z = (opcode & 0b00000111);
 	p = y >> 1;
 	q = y & 0b00000001;
-	executeOpcode(x, y, z, p, q);
+	if (prefixFlag == true)
+		executeCBOpcode(x, y, z, p, q);
+	if (prefixFlag == false)
+		executeOpcode(x, y, z, p, q);
 }
 
 void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
