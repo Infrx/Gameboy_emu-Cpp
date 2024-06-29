@@ -282,3 +282,47 @@ void Cpu::mem_write(const uint16_t adr, uint8_t value)
 {
 	memory[adr & 0xFFFF] = value;
 }
+
+
+void Cpu::setZeroF(uint32_t res)
+{
+	r.f &= ~0x80;
+	if (res == 0)
+		this->r.f |= 0x80;
+}
+
+void Cpu::setSubsF(bool subs)
+{
+	r.f &= ~0x40;
+	if (subs)
+		this->r.f |= 0x40;
+}
+
+void Cpu::setHCarryF(uint32_t res)
+{
+	r.f &= ~0x20;
+	if (isHalfCarry(res))
+		this->r.f |= 0x20;
+}
+
+void Cpu::setCarryF(uint32_t res, bool bFlag, bool borrow, bool shiftOut)
+{
+	r.f &= ~0x10;
+	if (is8bCarry(res, bFlag) || is16bCarry(res, bFlag) || borrow || shiftOut)
+		this->r.f |= 0x10; // Set the Carry flag bit if any condition is true
+}
+
+bool Cpu::is8bCarry(uint32_t res, bool bFlag)
+{
+	return (!bFlag && res > 0xFF);
+}
+
+bool Cpu::is16bCarry(uint32_t res, bool bFlag)
+{
+	return (bFlag && res > 0xFFFF);;
+}
+
+bool Cpu::isHalfCarry(uint32_t res)
+{
+	return ((res & 0x0FFF) > 0x0FFF);
+}

@@ -5,7 +5,7 @@
 
 const uint16_t START_ADRESS = 0x0100;
 
-class Registers
+struct Registers
 {
 public:
 
@@ -42,15 +42,4 @@ public:
         };
         uint16_t hl;     // Combined HL register (l + h)
     };
-
-    void setZeroF(uint32_t res);
-    void setSubsF(bool subs); // bFlag is false for 8 bit true for 16 bit
-    void setHCarryF(uint32_t res);
-    void setCarryF(uint32_t res, bool bFlags, bool borrow, bool shiftOut);
-
-    //helpers
-
-    bool is8bCarry(uint32_t res, bool bFlag);
-    bool is16bCarry(uint32_t res, bool bFlag);
-    bool isHalfCarry(uint32_t);
 };
