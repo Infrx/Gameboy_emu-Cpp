@@ -5,12 +5,9 @@
 
 const uint16_t START_ADRESS = 0x0100;
 
-struct Registers
+class Registers
 {
 public:
-
-	uint16_t pc{ START_ADRESS };
-	uint16_t sp{};
     union {
         struct {
             uint8_t f;   // Flags register
