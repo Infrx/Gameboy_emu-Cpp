@@ -38,6 +38,8 @@ private:
 	void setHCarryF8(bool flag);
 	void setHCarryF16(bool flag);
 	void setCarryF8(uint16_t res);
+	void setCarryF8(uint32_t res);
+	void setCarryF8(bool flag);
 	void setCarryF16(uint16_t res);
 	void setCarryFBorrow(uint16_t x, uint16_t y);
 	void setHCarryFBorrow(uint16_t x, uint16_t y);
@@ -88,7 +90,7 @@ private:
 
 	void SUB_A_r8(uint8_t& r8);
 	void SUB_A_HL();
-	void SUB_A_n8(uint8_t&n8);
+	void SUB_A_n8(uint8_t n8);
 
 	void SUB_A_r8(uint8_t& r8);
 	void SUB_A_HL();
@@ -96,7 +98,7 @@ private:
 
 	void XOR_A_r8(uint8_t& r8);
 	void XOR_A_HL();
-	void XOR_A_n8(uint8_t& n8);
+	void XOR_A_n8(uint8_t n8);
 
 	// 16-bit Arithmetic Instrucitons
 
@@ -106,14 +108,14 @@ private:
 
 	// Bit Operations Instructions
 
-	void BIT_u3_r8(uint8_t& r8);
-	void BIT_u3_HL();
+	void BIT_u3_r8(uint8_t& r8, uint8_t u3);
+	void BIT_u3_HL(uint8_t u3);
 
-	void RES_u3_r8(uint8_t& r8);
-	void RES_u3_HL();
+	void RES_u3_r8(uint8_t& r8, uint8_t u3);
+	void RES_u3_HL(uint8_t u3);
 
-	void SET_u3_r8(uint8_t& r8);
-	void SET_u3_HL();
+	void SET_u3_r8(uint8_t& r8, uint8_t u3);
+	void SET_u3_HL(uint8_t u3);
 
 	void SWAP_r8(uint8_t& r8);
 	void SWAP_HL();

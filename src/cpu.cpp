@@ -338,6 +338,20 @@ void Cpu::setCarryF8(uint16_t res)
 		this->r.f |= 0x10; 
 }
 
+void Cpu::setCarryF8(uint32_t res)
+{
+	r.f &= ~0x10;
+	if (is8bCarry(res))
+		this->r.f |= 0x10;
+}
+
+void Cpu::setCarryF8(bool flag)
+{
+	r.f &= ~0x10;
+	if (flag)
+		this->r.f |= 0x10;
+}
+
 void Cpu::setCarryF16(uint16_t res)
 {
 	r.f &= ~0x10;
@@ -562,7 +576,7 @@ void Cpu::DEC_HL()
 	setZeroF(res);
 	setSubsF(true);
 	setHCarryFBorrow(data, 1);
-	mem_write(r.hl, (mem_read(r.hl) - 1));
+	mem_write(r.hl, res);
 }
 
 void Cpu::INC_r8(uint8_t& r8)
@@ -585,5 +599,210 @@ void Cpu::INC_HL()
 	setZeroF(res);
 	setSubsF(false);
 	setHCarryF8(data, 1);
-	mem_write(r.hl, (mem_read(r.hl) + 1));
+	mem_write(r.hl, res);
 }
+
+void Cpu::OR_A_r8(uint8_t& r8)
+{
+	mCycle += 1;
+
+	uint16_t res = r.a | r8;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(false);
+	r.a = res;
+}
+
+void Cpu::OR_A_HL()
+{
+	mCycle += 2;
+	uint8_t data = mem_read(r.hl);
+	uint16_t res = r.a | data;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(false);
+	r.a = res;
+}
+
+void Cpu::OR_A_n8(uint8_t n8)
+{
+	mCycle += 2;
+
+	uint16_t res = r.a | n8;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(false);
+	r.a = res;
+}
+
+void Cpu::SBC_A_r8(uint8_t& r8)
+{
+	mCycle += 1;
+
+	uint8_t fCarry = static_cast<uint8_t>((r.f & 0x10) == 0x10);
+	uint32_t res = r.a - (r8 + fCarry);
+	setSubsF(true);
+	setHCarryFBorrow(r.a, (r8 + fCarry));
+	setCarryFBorrow(r.a, (r8 + fCarry));
+	r.a = res & 0xFF;
+}
+
+void Cpu::SBC_A_HL()
+{
+	mCycle += 2;
+	uint8_t data = mem_read(r.hl);
+	uint8_t fCarry = static_cast<uint8_t>((r.f & 0x10) == 0x10);
+	uint32_t res = r.a - (data + fCarry);
+	setSubsF(true);
+	setHCarryFBorrow(r.a, (data + fCarry));
+	setCarryFBorrow(r.a, (data + fCarry));
+	r.a = res & 0xFF;
+}
+
+void Cpu::SBC_A_n8(uint8_t n8)
+{
+	mCycle += 2;
+
+	uint8_t fCarry = static_cast<uint8_t>((r.f & 0x10) == 0x10);
+	uint32_t res = r.a - (n8 + fCarry);
+	setSubsF(true);
+	setHCarryFBorrow(r.a, (n8 + fCarry));
+	setCarryFBorrow(r.a, (n8 + fCarry));
+	r.a = res & 0xFF;
+}
+
+void Cpu::SUB_A_r8(uint8_t& r8)
+{
+	mCycle += 1;
+
+	uint32_t res = r.a - r8;
+	setSubsF(true);
+	setHCarryFBorrow(r.a, r8);
+	setCarryFBorrow(r.a, r8);
+	r.a = res & 0xFF;
+}
+
+void Cpu::SUB_A_HL()
+{
+	mCycle += 1;
+	uint8_t data = mem_read(r.hl);
+	uint32_t res = r.a - data;
+	setSubsF(true);
+	setHCarryFBorrow(r.a, data);
+	setCarryFBorrow(r.a, data);
+	r.a = res & 0xFF;
+}
+
+void Cpu::SUB_A_n8(uint8_t n8)
+{
+	mCycle += 2;
+
+	uint32_t res = r.a - n8;
+	setSubsF(true);
+	setHCarryFBorrow(r.a, n8);
+	setCarryFBorrow(r.a, n8);
+	r.a = res & 0xFF;
+}
+
+void Cpu::XOR_A_r8(uint8_t& r8)
+{
+	mCycle += 1;
+
+	uint16_t res = r.a ^ r8;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(false);
+	r.a = res;
+}
+
+void Cpu::XOR_A_HL()
+{
+	mCycle += 2;
+	
+	uint8_t data = mem_read(r.hl);
+	uint16_t res = r.a ^ data;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(false);
+	r.a = res;
+}
+
+void Cpu::XOR_A_n8(uint8_t n8)
+{
+	mCycle += 2;
+
+	uint16_t res = r.a ^ n8;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(false);
+	r.a = res;
+}
+
+void Cpu::ADD_HL_r16(uint16_t r16)
+{
+	mCycle += 2;
+
+	uint32_t res = r.hl + r16;
+	setSubsF(false);
+	setHCarryF16(r.hl + r16);
+	setCarryF16(r.hl + r16);
+	r.hl = res & 0xFFFF;
+}
+
+void Cpu::DEC_r16(uint16_t r16)
+{
+	mCycle += 2;
+
+	r16 -= 1;
+}
+
+void Cpu::INC_r16(uint16_t r16)
+{
+	mCycle += 2;
+
+	r16 += 1;
+}
+
+void Cpu::BIT_u3_r8(uint8_t& r8, uint8_t u3)
+{
+	mCycle += 2;
+
+	uint16_t res = (r8 & (1 << u3)) != 0;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+}
+
+void Cpu::BIT_u3_HL(uint8_t u3)
+{
+	mCycle += 3;
+
+	uint8_t data = mem_read(r.hl);
+	uint16_t res = (data & (1 << u3)) != 0;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+}
+
+void Cpu::RES_u3_r8(uint8_t& r8, uint8_t u3)
+{
+	mCycle += 2;
+
+	r8 &= (0xFF ^ (1 << u3));
+}
+
+void Cpu::RES_u3_HL(uint8_t u3)
+{
+	mCycle += 4;
+
+	uint8_t data = mem_read(r.hl);
+	data &= (0xFF ^ (1 << u3));
+	mem_write(r.hl, data);
+}
+
