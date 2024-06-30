@@ -7,13 +7,13 @@ Cpu::Cpu()
 
 void Cpu::fetchOpcode()
 {
-	opcode = mem_read(r.pc);
-	r.pc += 1;
+	opcode = mem_read(pc);
+	pc += 1;
 	if (opcode == 0xCB) 
 	{
 		prefixFlag = true;
-		cb_opcode = mem_read(r.pc);
-		r.pc += 1;
+		cb_opcode = mem_read(pc);
+		pc += 1;
 	}
 }
 
@@ -303,7 +303,7 @@ void Cpu::setSubsF(bool subs)
 		this->r.f |= 0x40;
 }
 
-void Cpu::setHCarryF8(uint8_t x, uint8_t y)
+void Cpu::setHCarryF8(uint16_t x, uint16_t y)
 {
 	r.f &= ~0x20;
 	if (isHalfCarry8(x, y))
@@ -314,6 +314,20 @@ void Cpu::setHCarryF16(uint16_t x, uint16_t y)
 {
 	r.f &= ~0x20;
 	if (isHalfCarry16(x, y))
+		this->r.f |= 0x20;
+}
+
+void Cpu::setHCarryF8(bool flag)
+{
+	r.f &= ~0x20;
+	if (flag)
+		this->r.f |= 0x20;
+}
+
+void Cpu::setHCarryF16(bool flag)
+{
+	r.f &= ~0x20;
+	if (flag)
 		this->r.f |= 0x20;
 }
 
@@ -331,8 +345,18 @@ void Cpu::setCarryF16(uint16_t res)
 		this->r.f |= 0x10;
 }
 
-void Cpu::setCarryFBorrow()
+void Cpu::setCarryFBorrow(uint16_t x, uint16_t y)
 {
+	r.f &= ~0x10;
+	if (isBorrow8(x,y))
+		this->r.f |= 0x10;
+}
+
+void Cpu::setHCarryFBorrow(uint16_t x, uint16_t y)
+{
+	r.f &= ~0x10;
+	if (isBorrow4(x, y))
+		this->r.f |= 0x10;
 }
 
 void Cpu::setCarryFShift()
@@ -350,7 +374,7 @@ bool Cpu::is16bCarry(uint32_t res)
 	return (res > 0xFFFF);;
 }
 
-bool Cpu::isHalfCarry8(uint8_t x, uint8_t y)
+bool Cpu::isHalfCarry8(uint16_t x, uint16_t y)
 {
 	return ((x < 0xF) && (y < 0xF) && ((x + y) > 0xF) );
 }
@@ -360,12 +384,22 @@ bool Cpu::isHalfCarry16(uint16_t x, uint16_t y)
 	return ((x < 0xFFF) && (y < 0xFFF) && ((x + y) > 0xFFF));;
 }
 
+bool Cpu::isBorrow8(uint16_t x, uint16_t y)
+{
+	return (x < y);  // y is r8 or r8 + carry
+}
+
+bool Cpu::isBorrow4(uint16_t x, uint16_t y)
+{
+	return ((x > 0xF && ((x - y) < 0xF)));
+}
+
 void Cpu::ADC_A_r8(uint8_t& r8)
 {
 	mCycle += 1;
 
 	uint8_t fCarry = static_cast<uint8_t>((r.f & 0x10) == 0x10);
-	uint16_t res = r.a + r8 + fCarry;
+	uint32_t res = r.a + r8 + fCarry;
 	setZeroF(res);
 	setSubsF(false); 
 	setHCarryF8(r.a, (r8 + fCarry));
@@ -392,9 +426,164 @@ void Cpu::ADC_A_n8(uint8_t n8)
 	mCycle += 2;
 
 	uint8_t fCarry = static_cast<uint8_t>((r.f & 0x10) == 0x10);
-	uint16_t res = r.a + n8 + fCarry; 
+	uint32_t res = r.a + n8 + fCarry; 
 	setSubsF(false);
 	setHCarryF8(r.a, (n8 + fCarry));
 	setCarryF8(res);
 	r.a = res & 0xFF;
+}
+
+void Cpu::ADD_A_r8(uint8_t& r8)
+{
+	mCycle += 1;
+
+	uint16_t res = r.a + r8;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(r.a, r8);
+	setCarryF8(res);
+	r.a = res & 0xFF;
+}
+
+void Cpu::ADD_A_HL()
+{
+	mCycle += 2;
+
+	uint8_t data = mem_read(r.hl);
+	uint16_t res = r.a + data;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(r.a, data );
+	setCarryF8(res);
+	r.a = res & 0xFF;
+}
+
+void Cpu::ADD_A_n8(uint8_t n8)
+{
+	mCycle += 2;
+
+	uint16_t res = r.a + n8;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(r.a, n8);
+	setCarryF8(res);
+	r.a = res & 0xFF;
+}
+
+void Cpu::AND_A_r8(uint8_t& r8)
+{
+	mCycle += 1;
+
+	uint16_t res = r.a & r8;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(true);
+	setCarryF8(res);
+	r.a = res;
+}
+
+void Cpu::AND_A_HL()
+{
+	mCycle += 2;
+
+	uint8_t data = mem_read(r.hl);
+	uint16_t res = r.a & data;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(true);
+	setCarryF8(res);
+	r.a = res;
+}
+
+void Cpu::AND_A_n8(uint8_t n8)
+{
+	mCycle += 2;
+
+	uint16_t res = r.a & n8;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(true);
+	setCarryF8(res);
+	r.a = res;
+}
+
+void Cpu::CP_A_r8(uint8_t& r8)
+{
+	mCycle += 1;
+
+	uint16_t res = r.a - r8;
+	setZeroF(res);
+	setSubsF(true);
+	setHCarryFBorrow(r.a, r8);
+	setCarryFBorrow(r.a, r8);
+	// dont store the result
+}
+
+void Cpu::CP_A_HL()
+{
+	mCycle += 2;
+
+	uint8_t data = mem_read(r.hl);
+	uint16_t res = r.a - data;
+	setZeroF(res);
+	setSubsF(true);
+	setHCarryFBorrow(r.a, data);
+	setCarryFBorrow(r.a, data);
+}
+
+void Cpu::CP_A_n8(uint8_t n8)
+{
+	mCycle += 2;
+
+	uint16_t res = r.a - n8;
+	setZeroF(res);
+	setSubsF(true);
+	setHCarryFBorrow(r.a, n8);
+	setCarryFBorrow(r.a, n8);
+}
+
+void Cpu::DEC_r8(uint8_t& r8)
+{
+	mCycle += 1;
+
+	uint16_t res = r8 - 1;
+	setZeroF(res);
+	setSubsF(true);
+	setHCarryFBorrow(r8, 1);
+	r8 = res;
+}
+
+void Cpu::DEC_HL()
+{
+	mCycle += 3;
+	
+	uint8_t data = mem_read(r.hl);
+	uint16_t res = data - 1;
+	setZeroF(res);
+	setSubsF(true);
+	setHCarryFBorrow(data, 1);
+	mem_write(r.hl, (mem_read(r.hl) - 1));
+}
+
+void Cpu::INC_r8(uint8_t& r8)
+{
+	mCycle += 1;
+
+	uint16_t res = r8 + 1;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(r8, 1);
+	r8 = res & 0xFF;
+}
+
+void Cpu::INC_HL()
+{
+	mCycle += 3;
+
+	uint8_t data = mem_read(r.hl);
+	uint16_t res = data + 1;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(data, 1);
+	mem_write(r.hl, (mem_read(r.hl) + 1));
 }

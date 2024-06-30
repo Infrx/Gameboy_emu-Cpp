@@ -33,18 +33,23 @@ private:
 
 	void setZeroF(uint32_t res);
 	void setSubsF(bool subs); // bFlag is false for 8 bit true for 16 bit
-	void setHCarryF8(uint8_t x, uint8_t y);
+	void setHCarryF8(uint16_t x, uint16_t y);
 	void setHCarryF16(uint16_t x, uint16_t y);
+	void setHCarryF8(bool flag);
+	void setHCarryF16(bool flag);
 	void setCarryF8(uint16_t res);
 	void setCarryF16(uint16_t res);
-	void setCarryFBorrow();
+	void setCarryFBorrow(uint16_t x, uint16_t y);
+	void setHCarryFBorrow(uint16_t x, uint16_t y);
 	void setCarryFShift();
 	//flag method helpers
 
 	bool is8bCarry(uint16_t res);
 	bool is16bCarry(uint32_t res);
-	bool isHalfCarry8(uint8_t x, uint8_t y);
+	bool isHalfCarry8(uint16_t x, uint16_t y);
 	bool isHalfCarry16(uint16_t x, uint16_t y);
+	bool isBorrow8(uint16_t x, uint16_t y);
+	bool isBorrow4(uint16_t x, uint16_t y);
 
 
 	// Instructions
