@@ -806,3 +806,326 @@ void Cpu::RES_u3_HL(uint8_t u3)
 	mem_write(r.hl, data);
 }
 
+void Cpu::SET_u3_r8(uint8_t& r8, uint8_t u3)
+{
+	mCycle += 2;
+
+	r8 |= (1 << u3);
+}
+
+void Cpu::SET_u3_HL(uint8_t u3)
+{
+	mCycle += 4;
+	
+	uint8_t data = mem_read(r.hl) | (1 << u3);
+	mem_write(r.hl, data);
+}
+
+void Cpu::SWAP_r8(uint8_t& r8)
+{
+	mCycle += 2;
+
+	uint8_t temp1 = (r8 & 0x0F) << 4;
+	uint8_t temp2 = (r8 & 0xF0) >> 4;
+	uint8_t res = temp1 | temp2;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(false);
+	r8 = res;
+}
+
+void Cpu::SWAP_HL()
+{
+	mCycle += 4;
+
+	uint8_t data = mem_read(r.hl);
+	uint8_t temp1 = (data & 0x0F) << 4;
+	uint8_t temp2 = (data & 0xF0) >> 4;
+	uint8_t res = temp1 | temp2;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(false);
+	mem_write(r.hl, res);
+}
+
+void Cpu::RL_r8(uint8_t& r8)
+{
+	mCycle += 2;
+
+	uint8_t b7 = r8 & 0x80;
+	bool flag = static_cast<bool>(b7);
+	uint8_t res = (r8 << 1);
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(flag);
+	r8 = res;
+}
+
+void Cpu::RL_HL()
+{
+	mCycle += 4;
+
+	uint8_t data = mem_read(r.hl);
+	uint8_t b7 = data & 0x80;
+	bool flag = static_cast<bool>(b7);
+	uint8_t res = (data << 1);
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(flag);
+	mem_write(r.hl, res);
+}
+
+void Cpu::RLA()
+{
+	mCycle += 2;
+
+	uint8_t b7 = r.a & 0x80;
+	bool flag = static_cast<bool>(b7);
+	uint8_t res = (r.a << 1);
+	r.f |= 0x80; // setZeroF(res); use overload
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(flag);
+	r.a = res;
+}
+
+void Cpu::RLC_r8(uint8_t& r8)
+{
+	mCycle += 2;
+
+	uint8_t b7 = r8 & 0x80;
+	bool flag = static_cast<bool>(b7);
+	uint8_t res = (r8 << 1);
+	if (flag)
+		res |= 0x01;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(flag);
+	r8 = res;
+}
+
+void Cpu::RLC_HL()
+{
+	mCycle += 4;
+
+	uint8_t data = mem_read(r.hl);
+	uint8_t b7 = data & 0x80;
+	bool flag = static_cast<bool>(b7);
+	uint8_t res = (data << 1);
+	if (flag)
+		res |= 0x01;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(flag);
+	mem_write(r.hl, res);
+}
+
+void Cpu::RLCA()
+{
+	mCycle += 2;
+
+	uint8_t b7 = r.a & 0x80;
+	bool flag = static_cast<bool>(b7);
+	uint8_t res = (r.a << 1);
+	if (flag)
+		res |= 0x01;
+	r.f |= 0x80; // setZeroF(res); use overload
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(flag);
+	r.a = res;
+}
+
+void Cpu::RR_r8(uint8_t& r8)
+{
+	mCycle += 2;
+
+	uint8_t b0 = r8 & 0x01;
+	bool flag = static_cast<bool>(b0);
+	uint8_t res = (r8 >> 1);
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(flag);
+	r8 = res;
+}
+
+void Cpu::RR_HL()
+{
+	mCycle += 4;
+
+	uint8_t data = mem_read(r.hl);
+	uint8_t b0 = data & 0x01;
+	bool flag = static_cast<bool>(b0);
+	uint8_t res = (data >> 1);
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(flag);
+	mem_write(r.hl, res);
+}
+
+void Cpu::RRA()
+{
+	mCycle += 2;
+
+	uint8_t b0 = r.a & 0x01;
+	bool flag = static_cast<bool>(b0);
+	uint8_t res = (r.a >> 1);
+	r.f |= 0x80; // setZeroF(res); use overload
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(flag);
+	r.a = res;
+}
+
+void Cpu::RRC_r8(uint8_t& r8)
+{
+	mCycle += 2;
+
+	uint8_t b0 = r8 & 0x01;
+	bool flag = static_cast<bool>(b0);
+	uint8_t res = (r8 >> 1);
+	if (flag)
+		res |= 0x80;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(flag);
+	r8 = res;
+}
+
+void Cpu::RRC_HL()
+{
+	mCycle += 4;
+
+	uint8_t data = mem_read(r.hl);
+	uint8_t b0 = data & 0x01;
+	bool flag = static_cast<bool>(b0);
+	uint8_t res = (data >> 1);
+	if (flag)
+		res |= 0x80;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(flag);
+	mem_write(r.hl, res);
+}
+
+void Cpu::RRCA()
+{
+	mCycle += 2;
+
+	uint8_t b0 = r.a & 0x01;
+	bool flag = static_cast<bool>(b0);
+	uint8_t res = (r.a >> 1);
+	if (flag)
+		res |= 0x80;
+	r.f |= 0x80; // setZeroF(res); use overload
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(flag);
+	r.a = res;
+}
+
+void Cpu::SLA_r8(uint8_t& r8)
+{
+	mCycle += 2;
+
+	uint8_t b7 = r8 & 0x80;
+	bool flag = static_cast<bool>(b7);
+	uint8_t res = r8 << 1;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(flag);
+	r8 = res;
+}
+
+void Cpu::SLA_HL()
+{
+	mCycle += 4;
+
+	uint8_t data = mem_read(r.hl);
+	uint8_t b7 = data & 0x80;
+	bool flag = static_cast<bool>(b7);
+	uint8_t res = data << 1;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(flag);
+	mem_write(r.hl, res);
+}
+
+void Cpu::SRA_r8(uint8_t& r8)
+{
+	mCycle += 2;
+
+	uint8_t b0 = r8 & 0x01;
+	uint8_t b0 = r8 & 0x80;
+	bool flagb0 = static_cast<bool>(b0);
+	bool flagb7 = static_cast<bool>(b0);
+	uint8_t res = r8 >> 1;
+	if (flagb7)
+		res |= 0x80;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(flagb0);
+	r8 = res;
+}
+
+void Cpu::SRA_HL()
+{
+	mCycle += 4;
+
+	uint8_t data = mem_read(r.hl);
+	uint8_t b0 = data & 0x01;
+	uint8_t b0 = data & 0x80;
+	bool flagb0 = static_cast<bool>(b0);
+	bool flagb7 = static_cast<bool>(b0);
+	uint8_t res = data >> 1;
+	if (flagb7)
+		res |= 0x80;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(flagb0);
+	mem_write(r.hl, res);
+}
+
+void Cpu::SRL_r8(uint8_t& r8)
+{
+	mCycle += 2;
+
+	uint8_t b0 = r8 & 0x01;
+	bool flag = static_cast<bool>(b0);
+	uint8_t res = r8 >> 1;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(flag);
+	r8 = res;
+}
+
+void Cpu::SRL_HL()
+{
+	mCycle += 4;
+
+	uint8_t data = mem_read(r.hl);
+	uint8_t b0 = data & 0x01;
+	bool flag = static_cast<bool>(b0);
+	uint8_t res = data >> 1;
+	setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(flag);
+	mem_write(r.hl, res);
+}
+
