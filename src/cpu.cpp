@@ -1129,3 +1129,35 @@ void Cpu::SRL_HL()
 	mem_write(r.hl, res);
 }
 
+void Cpu::LD_r8_r8(uint8_t& r8, uint8_t& r8_)
+{
+}
+
+void Cpu::LD_r8_n8(uint8_t& r8, uint8_t n8)
+{
+}
+
+void Cpu::LD_r16_n16(uint16_t& r16, uint16_t n16)
+{
+}
+
+void Cpu::LD_HL_r8(uint8_t& r8)
+{
+}
+
+void Cpu::LD_HL_n8(uint8_t n8)
+{
+}
+
+void Cpu::LD_r8_HL(uint8_t& r8)
+{
+}
+
+void Cpu::LD_r16_A(uint16_t& r16)
+{
+}
+
+void Cpu::LD_n16_A(uint16_t n16)
+{
+}
+
