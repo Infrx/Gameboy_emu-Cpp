@@ -1131,33 +1131,100 @@ void Cpu::SRL_HL()
 
 void Cpu::LD_r8_r8(uint8_t& r8, uint8_t& r8_)
 {
+	mCycle += 1;
+
+	r8 = r8_;
 }
 
 void Cpu::LD_r8_n8(uint8_t& r8, uint8_t n8)
 {
+	mCycle += 2;
+
+	r8 = n8;
 }
 
 void Cpu::LD_r16_n16(uint16_t& r16, uint16_t n16)
 {
+	mCycle += 3;
+
+	r16 = n16;
 }
 
 void Cpu::LD_HL_r8(uint8_t& r8)
 {
+	mCycle += 2;
+
+	mem_write(r.hl, r8);
 }
 
 void Cpu::LD_HL_n8(uint8_t n8)
 {
+	mCycle += 3;
+
+	mem_write(r.hl, n8);
 }
 
 void Cpu::LD_r8_HL(uint8_t& r8)
 {
+	mCycle += 2;
+
+	r8 = mem_read(r.hl);
 }
 
 void Cpu::LD_r16_A(uint16_t& r16)
 {
+	mCycle += 2;
+
+	mem_write(r16, r.a);
 }
 
 void Cpu::LD_n16_A(uint16_t n16)
 {
+	mCycle += 4;
+
+	mem_write(n16, r.a);
+}
+
+void Cpu::LDH_n16_A(uint16_t n16)
+{
+	mCycle += 3;
+
+	if (n16 <= 0xFFFF && n16 >= 0xFF00)
+		mem_write(n16, r.a);
+}
+
+void Cpu::LDH_C_A()
+{
+	mCycle += 2;
+
+	mem_write(0xFF00 + r.c, r.a);
+}
+
+void Cpu::LD_A_r16(uint16_t& r16)
+{
+	mCycle += 2;
+
+	r.a = mem_read(r16);
+}
+
+void Cpu::LD_A_n16(uint16_t n16)
+{
+	mCycle += 4;
+
+	r.a = mem_read(n16);
+}
+
+void Cpu::LDH_A_n16(uint16_t n16)
+{
+	mCycle += 3;
+	if (n16 <= 0xFFFF && n16 >= 0xFF00)
+		r.a = mem_read(n16);
+}
+
+void Cpu::LDH_A_C()
+{
+	mCycle += 2;
+
+	r.a = mem_read(0xFF00 + r.c);
 }
 
