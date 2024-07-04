@@ -1228,3 +1228,35 @@ void Cpu::LDH_A_C()
 	r.a = mem_read(0xFF00 + r.c);
 }
 
+void Cpu::LD_HLI_A()
+{
+	mCycle += 2;
+	
+	r.a = mem_read(r.hl);
+	++r.hl;
+}
+
+void Cpu::LD_HLD_A()
+{
+	mCycle += 2;
+
+	r.a = mem_read(r.hl);
+	--r.hl;
+}
+
+void Cpu::LD_A_HLI()
+{
+	mCycle += 2;
+
+	mem_write(r.hl, r.a);
+	++r.hl;
+}
+
+void Cpu::LD_A_HLD()
+{
+	mCycle += 2;
+
+	mem_write(r.hl, r.a);
+	--r.hl;
+}
+
