@@ -1260,3 +1260,34 @@ void Cpu::LD_A_HLD()
 	--r.hl;
 }
 
+void Cpu::ADD_HL_SP()
+{
+	mCycle += 2;
+	
+	r.hl += sp;
+}
+
+void Cpu::ADD_SP_e8(int8_t e8)
+{
+	mCycle += 4;
+
+	uint16_t res = sp + e8;
+	r.f &= ~0x80; //setZeroF(res);
+	setSubsF(false);
+	setHCarryF8(sp, e8);
+	setCarryF8(res);
+}
+
+void Cpu::DEC_SP()
+{
+	mCycle += 2;
+
+	--sp;
+}
+
+void Cpu::INC_SP()
+{
+	mCycle += 2;
+
+	++sp;
+}
