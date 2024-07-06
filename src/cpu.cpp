@@ -1325,3 +1325,29 @@ void Cpu::LD_SP_HL()
 
 	sp = r.hl;
 }
+
+void Cpu::CCF()
+{
+	mCycle += 1;
+
+	setSubsF(false);
+	setHCarryF8(false);
+	if ((r.f & 0x10) == 1)
+		setCarryF8(false);
+	else
+		setCarryF8(true);
+}
+
+void Cpu::NOP()
+{
+	mCycle += 1;
+}
+
+void Cpu::SCF()
+{
+	mCycle += 1;
+
+	setSubsF(false);
+	setHCarryF8(false);
+	setCarryF8(true);
+}
