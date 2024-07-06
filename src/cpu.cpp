@@ -1351,3 +1351,148 @@ void Cpu::SCF()
 	setHCarryF8(false);
 	setCarryF8(true);
 }
+
+void Cpu::CALL_n16(uint16_t n16)
+{
+	mCycle += 6;
+	uint8_t data1 = static_cast<uint8_t>(n16 >> 8);
+	uint8_t data2 = static_cast<uint8_t>((n16 << 8) >> 8);
+	--sp;
+	mem_write(sp, data1);
+	--sp;
+	mem_write(sp, data2);
+	JP_n16(n16);
+}
+
+void Cpu::CALL_cc_n16(std::string cc, uint16_t n16)
+{
+	mCycle += 6;
+
+	uint8_t data1 = static_cast<uint8_t>(n16 >> 8);
+	uint8_t data2 = static_cast<uint8_t>((n16 << 8) >> 8);
+
+	if (cc == "Z")
+	{
+		if ((r.f & 0x80) == 0x80);
+		{
+			--sp;
+			mem_write(sp, data1);
+			--sp;
+			mem_write(sp, data2);
+			JP_n16(n16);
+		}
+	}
+	else if (cc == "NZ")
+	{
+		if ((r.f & 0x80) == 0);
+		{
+			--sp;
+			mem_write(sp, data1);
+			--sp;
+			mem_write(sp, data2);
+			JP_n16(n16);
+		}
+	}
+	else if (cc == "C")
+	{
+		if ((r.f & 0x10) == 0x10);
+		{
+			--sp;
+			mem_write(sp, data1);
+			--sp;
+			mem_write(sp, data2);
+			JP_n16(n16);
+		}
+	}
+	else if (cc == "NC")
+	{
+		if ((r.f & 0x10) == 0);
+		{
+			--sp;
+			mem_write(sp, data1);
+			--sp;
+			mem_write(sp, data2);
+			JP_n16(n16);
+		}
+	}
+	else if (cc == "! cc")
+		mCycle -= 3;
+}
+
+void Cpu::JP_HL()
+{
+	mCycle += 1;
+
+	pc = r.hl;
+}
+
+void Cpu::JP_n16(uint16_t n16)
+{
+	mCycle += 4;
+
+	pc = n16;
+
+}
+
+void Cpu::JP_cc_n16(std::string cc, uint16_t n16)
+{
+	mCycle += 4;
+
+	if (cc == "Z")
+	{
+		if ((r.f & 0x80) == 0x80);
+		pc = n16;
+	}
+	else if (cc == "NZ")
+	{
+		if ((r.f & 0x80) == 0);
+		pc = n16;
+	}
+	else if (cc == "C")
+	{
+		if ((r.f & 0x10) == 0x10);
+		pc = n16;
+	}
+	else if (cc == "NC")
+	{
+		if ((r.f & 0x10) == 0);
+		pc = n16;
+	}
+	else if (cc == "! cc")
+		mCycle -= 1;
+}
+
+void Cpu::JR_e8(int8_t e8)
+{
+	mCycle += 3;
+
+	pc += e8;
+}
+
+void Cpu::JR_cc_e8(std::string cc, int8_t e8)
+{
+	mCycle += 3;
+
+	if (cc == "Z")
+	{
+		if ((r.f & 0x80) == 0x80);
+		pc += e8;
+	}
+	else if (cc == "NZ")
+	{
+		if ((r.f & 0x80) == 0);
+		pc += e8;
+	}
+	else if (cc == "C")
+	{
+		if ((r.f & 0x10) == 0x10);
+		pc += e8;
+	}
+	else if (cc == "NC")
+	{
+		if ((r.f & 0x10) == 0);
+		pc += e8;
+	}
+	else if (cc == "! cc")
+		mCycle -= 1;
+}

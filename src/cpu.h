@@ -174,13 +174,13 @@ private:
 	// Jumps and Subroutines
 
 	void CALL_n16(uint16_t n16);
-	void CALL_cc_n16(uint16_t n16);
+	void CALL_cc_n16(std::string cc, uint16_t n16);
 
 	void JP_HL();
 	void JP_n16(uint16_t n16);
-	void JP_cc_n16(uint16_t n16);
-	void JR_n16(uint16_t n16);
-	void JR_cc_n16(uint16_t n16);
+	void JP_cc_n16(std::string cc, uint16_t n16);
+	void JR_e8(int8_t e8);
+	void JR_cc_e8(std::string cc, int8_t e8);
 
 	void RET_cc();
 	void RET();
