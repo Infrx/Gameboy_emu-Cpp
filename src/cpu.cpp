@@ -1291,3 +1291,37 @@ void Cpu::INC_SP()
 
 	++sp;
 }
+
+void Cpu::LD_SP_n16(uint16_t n16)
+{
+	mCycle += 3;
+
+	sp = n16;
+}
+
+void Cpu::LD_n16_SP(uint16_t n16)
+{
+	mCycle +=5;
+
+	mem_write(n16, (sp & 0xFF));
+	mem_write((n16 + 1), (sp >> 8));
+}
+
+void Cpu::LD_HL_SP_e8(int8_t e8)
+{
+	mCycle += 3;
+
+	uint16_t res = sp + e8;
+	r.f &= ~0x80; //setZeroF(res); need bool overlaod
+	setSubsF(false);
+	setHCarryF8(sp, e8);
+	setCarryF8(res);
+	r.hl = res;
+}
+
+void Cpu::LD_SP_HL()
+{
+	mCycle += 2;
+
+	sp = r.hl;
+}
