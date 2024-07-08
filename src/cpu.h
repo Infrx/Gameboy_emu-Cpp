@@ -44,6 +44,7 @@ private:
 	void setCarryFBorrow(uint16_t x, uint16_t y);
 	void setHCarryFBorrow(uint16_t x, uint16_t y);
 	void setCarryFShift();
+
 	//flag method helpers
 
 	bool is8bCarry(uint16_t res);

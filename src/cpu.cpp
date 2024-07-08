@@ -1326,6 +1326,56 @@ void Cpu::LD_SP_HL()
 	sp = r.hl;
 }
 
+void Cpu::POP_AF()
+{
+	mCycle += 3;
+
+	r.f = mem_read(sp);
+	++sp;
+	r.a = mem_read(sp);
+	++sp;
+
+	uint8_t res = r.f;
+	setZeroF(res & 0x80);
+	setSubsF(res & 0x40);
+	setHCarryF8(res & 0x20);
+	setCarryF8(static_cast<bool>(res & 0x10));
+}
+
+void Cpu::POP_r16(uint16_t& r16)
+{
+	mCycle += 3;
+
+	uint8_t lsb = mem_read(sp);
+	++sp;
+	uint8_t msb = mem_read(sp);
+	++sp;
+
+	r16 = (msb << 8) | lsb;
+}
+
+void Cpu::PUSH_AF()
+{
+	mCycle += 4;
+
+	--sp;
+	mem_write(sp, r.a);
+	--sp;
+	mem_write(sp, r.f);
+}
+
+void Cpu::PUSH_r16(uint16_t& r16)
+{
+	mCycle += 4;
+
+	uint8_t msb = r16 >> 8;
+	uint8_t lsb = (r16 << 8) >> 8;
+	--sp;
+	mem_write(sp, msb);
+	--sp;
+	mem_write(sp, lsb);
+}
+
 void Cpu::CCF()
 {
 	mCycle += 1;
