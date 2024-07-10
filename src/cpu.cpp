@@ -1546,3 +1546,71 @@ void Cpu::JR_cc_e8(std::string cc, int8_t e8)
 	else if (cc == "! cc")
 		mCycle -= 1;
 }
+
+void Cpu::RET_cc(std::string cc)
+{
+	mCycle += 5;
+
+	if (cc == "Z")
+	{
+		if ((r.f & 0x80) == 0x80);
+		{
+			uint8_t lsb = mem_read(sp);
+			++sp;
+			uint8_t msb = mem_read(sp);
+			++sp;
+
+			pc = (msb << 8) | lsb;
+		}
+	}
+	else if (cc == "NZ")
+	{
+		if ((r.f & 0x80) == 0);
+		{
+			uint8_t lsb = mem_read(sp);
+			++sp;
+			uint8_t msb = mem_read(sp);
+			++sp;
+
+			pc = (msb << 8) | lsb;
+		}
+	}
+	else if (cc == "C")
+	{
+		if ((r.f & 0x10) == 0x10);
+		{
+			uint8_t lsb = mem_read(sp);
+			++sp;
+			uint8_t msb = mem_read(sp);
+			++sp;
+
+			pc = (msb << 8) | lsb;
+		}
+	}
+	else if (cc == "NC")
+	{
+		if ((r.f & 0x10) == 0);
+		{
+			uint8_t lsb = mem_read(sp);
+			++sp;
+			uint8_t msb = mem_read(sp);
+			++sp;
+
+			pc = (msb << 8) | lsb;
+		}
+	}
+	else if (cc == "! cc")
+		mCycle -= 3;
+}
+
+void Cpu::RET()
+{
+	mCycle += 4;
+
+	uint8_t lsb = mem_read(sp);
+	++sp;
+	uint8_t msb = mem_read(sp);
+	++sp;
+
+	pc = (msb << 8) | lsb;
+}

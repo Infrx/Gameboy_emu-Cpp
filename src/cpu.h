@@ -183,7 +183,7 @@ private:
 	void JR_e8(int8_t e8);
 	void JR_cc_e8(std::string cc, int8_t e8);
 
-	void RET_cc();
+	void RET_cc(std::string cc);
 	void RET();
 	void RETI();
 
