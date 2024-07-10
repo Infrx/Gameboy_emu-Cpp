@@ -1388,6 +1388,16 @@ void Cpu::CCF()
 		setCarryF8(true);
 }
 
+void Cpu::CPL()
+{
+	mCycle += 1;
+
+	r.a = ~r.a;
+	setSubsF(true);
+	setHCarryF8(true);
+}
+
+
 void Cpu::NOP()
 {
 	mCycle += 1;
@@ -1613,4 +1623,16 @@ void Cpu::RET()
 	++sp;
 
 	pc = (msb << 8) | lsb;
+}
+
+void Cpu::RST_vec(uint8_t vec)
+{
+	mCycle += 4;
+;
+	--sp;
+	mem_write(sp, 0x00);
+	--sp;
+	mem_write(sp, vec);
+	uint16_t res = 0x00 | vec;
+	JP_n16(res);
 }

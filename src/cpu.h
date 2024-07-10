@@ -187,7 +187,7 @@ private:
 	void RET();
 	void RETI();
 
-	void RST_vec();
+	void RST_vec(uint8_t vec);
 	
 	// Stack Operations Instructions
 
