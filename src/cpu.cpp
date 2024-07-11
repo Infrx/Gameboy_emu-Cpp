@@ -1398,6 +1398,18 @@ void Cpu::CPL()
 }
 
 
+void Cpu::DI()
+{
+	mCycle += 1;
+	IME = 0;
+}
+
+void Cpu::EI()
+{
+	mCycle += 1;
+	IME = 1;
+}
+
 void Cpu::NOP()
 {
 	mCycle += 1;
@@ -1623,6 +1635,12 @@ void Cpu::RET()
 	++sp;
 
 	pc = (msb << 8) | lsb;
+}
+
+void Cpu::RETI()
+{
+	RET();
+	IME = 1;
 }
 
 void Cpu::RST_vec(uint8_t vec)

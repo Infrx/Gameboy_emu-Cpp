@@ -14,6 +14,7 @@ public:
 	uint8_t memory[65536];
 	uint16_t pc;
 	uint16_t sp;
+	bool IME;
 	int mCycle;
 	bool prefixFlag;
 	Cpu();
