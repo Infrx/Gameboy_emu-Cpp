@@ -1424,6 +1424,11 @@ void Cpu::SCF()
 	setCarryF8(true);
 }
 
+void Cpu::STOP()
+{
+	// need to stop the program
+}
+
 void Cpu::CALL_n16(uint16_t n16)
 {
 	mCycle += 6;
