@@ -1068,9 +1068,9 @@ void Cpu::SRA_r8(uint8_t& r8)
 	mCycle += 2;
 
 	uint8_t b0 = r8 & 0x01;
-	uint8_t b0 = r8 & 0x80;
+	uint8_t b7 = r8 & 0x80;
 	bool flagb0 = static_cast<bool>(b0);
-	bool flagb7 = static_cast<bool>(b0);
+	bool flagb7 = static_cast<bool>(b7);
 	uint8_t res = r8 >> 1;
 	if (flagb7)
 		res |= 0x80;
@@ -1087,9 +1087,9 @@ void Cpu::SRA_HL()
 
 	uint8_t data = mem_read(r.hl);
 	uint8_t b0 = data & 0x01;
-	uint8_t b0 = data & 0x80;
+	uint8_t b7 = data & 0x80;
 	bool flagb0 = static_cast<bool>(b0);
-	bool flagb7 = static_cast<bool>(b0);
+	bool flagb7 = static_cast<bool>(b7);
 	uint8_t res = data >> 1;
 	if (flagb7)
 		res |= 0x80;

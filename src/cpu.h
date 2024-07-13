@@ -94,9 +94,9 @@ private:
 	void SUB_A_HL();
 	void SUB_A_n8(uint8_t n8);
 
-	void SUB_A_r8(uint8_t& r8);
-	void SUB_A_HL();
-	void SUB_A_n8(uint8_t n8);
+	//void SUB_A_r8(uint8_t& r8);
+	//void SUB_A_HL();
+	//void SUB_A_n8(uint8_t n8);
 
 	void XOR_A_r8(uint8_t& r8);
 	void XOR_A_HL();
@@ -220,5 +220,4 @@ private:
 	void NOP();
 	void SCF();
 	void STOP();
-
 };
