@@ -22,13 +22,12 @@ public:
 	void decodeOpcode(uint8_t opcode, uint8_t cb_opcode, bool prefixFlag);
 	void executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q);
 	void executeCBOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q);
-	
+	Registers r;
 private:
 	uint8_t mem_read(const uint16_t adr) const;
 	void mem_write(const uint16_t adr, uint8_t value);
 
-	Registers r;
-	Instructions Ins;
+	
 
 	// flag methods
 
@@ -41,7 +40,7 @@ private:
 	void setCarryF8(uint16_t res);
 	void setCarryF8(uint32_t res);
 	void setCarryF8(bool flag);
-	void setCarryF16(uint16_t res);
+	void setCarryF16(uint32_t res);
 	void setCarryFBorrow(uint16_t x, uint16_t y);
 	void setHCarryFBorrow(uint16_t x, uint16_t y);
 	void setCarryFShift();
@@ -55,7 +54,7 @@ private:
 	bool isBorrow8(uint16_t x, uint16_t y);
 	bool isBorrow4(uint16_t x, uint16_t y);
 
-
+public: //for unit test
 	// Instructions
 	// 
 	// 8-bit Arithmetic and Logic Instructions

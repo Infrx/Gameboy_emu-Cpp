@@ -352,7 +352,7 @@ void Cpu::setCarryF8(bool flag)
 		this->r.f |= 0x10;
 }
 
-void Cpu::setCarryF16(uint16_t res)
+void Cpu::setCarryF16(uint32_t res)
 {
 	r.f &= ~0x10;
 	if (is16bCarry(res))
@@ -395,7 +395,7 @@ bool Cpu::isHalfCarry8(uint16_t x, uint16_t y)
 
 bool Cpu::isHalfCarry16(uint16_t x, uint16_t y)
 {
-	return ((x < 0xFFF) && (y < 0xFFF) && ((x + y) > 0xFFF));;
+	return (((x & 0xFFF) + (y & 0xFFF) ) > 0xFFF);
 }
 
 bool Cpu::isBorrow8(uint16_t x, uint16_t y)
@@ -750,8 +750,8 @@ void Cpu::ADD_HL_r16(uint16_t r16)
 
 	uint32_t res = r.hl + r16;
 	setSubsF(false);
-	setHCarryF16(r.hl + r16);
-	setCarryF16(r.hl + r16);
+	setHCarryF16(r.hl, r16);
+	setCarryF16(res);
 	r.hl = res & 0xFFFF;
 }
 
