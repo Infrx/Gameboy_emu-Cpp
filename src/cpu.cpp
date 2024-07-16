@@ -1450,7 +1450,7 @@ void Cpu::CALL_cc_n16(std::string cc, uint16_t n16)
 
 	if (cc == "Z")
 	{
-		if ((r.f & 0x80) == 0x80);
+		if ((r.f & 0x80) == 0x80)
 		{
 			--sp;
 			mem_write(sp, data1);
@@ -1461,7 +1461,7 @@ void Cpu::CALL_cc_n16(std::string cc, uint16_t n16)
 	}
 	else if (cc == "NZ")
 	{
-		if ((r.f & 0x80) == 0);
+		if ((r.f & 0x80) == 0)
 		{
 			--sp;
 			mem_write(sp, data1);
@@ -1472,7 +1472,7 @@ void Cpu::CALL_cc_n16(std::string cc, uint16_t n16)
 	}
 	else if (cc == "C")
 	{
-		if ((r.f & 0x10) == 0x10);
+		if ((r.f & 0x10) == 0x10)
 		{
 			--sp;
 			mem_write(sp, data1);
@@ -1483,7 +1483,7 @@ void Cpu::CALL_cc_n16(std::string cc, uint16_t n16)
 	}
 	else if (cc == "NC")
 	{
-		if ((r.f & 0x10) == 0);
+		if ((r.f & 0x10) == 0)
 		{
 			--sp;
 			mem_write(sp, data1);
@@ -1517,23 +1517,23 @@ void Cpu::JP_cc_n16(std::string cc, uint16_t n16)
 
 	if (cc == "Z")
 	{
-		if ((r.f & 0x80) == 0x80);
-		pc = n16;
+		if ((r.f & 0x80) == 0x80)
+			pc = n16;
 	}
 	else if (cc == "NZ")
 	{
-		if ((r.f & 0x80) == 0);
-		pc = n16;
+		if ((r.f & 0x80) == 0)
+			pc = n16;
 	}
 	else if (cc == "C")
 	{
-		if ((r.f & 0x10) == 0x10);
-		pc = n16;
+		if ((r.f & 0x10) == 0x10)
+			pc = n16;
 	}
 	else if (cc == "NC")
 	{
-		if ((r.f & 0x10) == 0);
-		pc = n16;
+		if ((r.f & 0x10) == 0)
+			pc = n16;
 	}
 	else if (cc == "! cc")
 		mCycle -= 1;
@@ -1552,23 +1552,23 @@ void Cpu::JR_cc_e8(std::string cc, int8_t e8)
 
 	if (cc == "Z")
 	{
-		if ((r.f & 0x80) == 0x80);
-		pc += e8;
+		if ((r.f & 0x80) == 0x80)
+			pc += e8;
 	}
 	else if (cc == "NZ")
 	{
-		if ((r.f & 0x80) == 0);
-		pc += e8;
+		if ((r.f & 0x80) == 0)
+			pc += e8;
 	}
 	else if (cc == "C")
 	{
-		if ((r.f & 0x10) == 0x10);
-		pc += e8;
+		if ((r.f & 0x10) == 0x10)
+			pc += e8;
 	}
 	else if (cc == "NC")
 	{
-		if ((r.f & 0x10) == 0);
-		pc += e8;
+		if ((r.f & 0x10) == 0)
+			pc += e8;
 	}
 	else if (cc == "! cc")
 		mCycle -= 1;
@@ -1580,7 +1580,7 @@ void Cpu::RET_cc(std::string cc)
 
 	if (cc == "Z")
 	{
-		if ((r.f & 0x80) == 0x80);
+		if ((r.f & 0x80) == 0x80)
 		{
 			uint8_t lsb = mem_read(sp);
 			++sp;
@@ -1592,7 +1592,7 @@ void Cpu::RET_cc(std::string cc)
 	}
 	else if (cc == "NZ")
 	{
-		if ((r.f & 0x80) == 0);
+		if ((r.f & 0x80) == 0)
 		{
 			uint8_t lsb = mem_read(sp);
 			++sp;
@@ -1604,7 +1604,7 @@ void Cpu::RET_cc(std::string cc)
 	}
 	else if (cc == "C")
 	{
-		if ((r.f & 0x10) == 0x10);
+		if ((r.f & 0x10) == 0x10)
 		{
 			uint8_t lsb = mem_read(sp);
 			++sp;
@@ -1616,7 +1616,7 @@ void Cpu::RET_cc(std::string cc)
 	}
 	else if (cc == "NC")
 	{
-		if ((r.f & 0x10) == 0);
+		if ((r.f & 0x10) == 0)
 		{
 			uint8_t lsb = mem_read(sp);
 			++sp;
