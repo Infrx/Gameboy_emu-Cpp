@@ -9,6 +9,8 @@ void Cpu::fetchOpcode()
 {
 	opcode = mem_read(pc);
 	pc += 1;
+	cb_opcode = 0;
+	prefixFlag = false;
 	if (opcode == 0xCB) 
 	{
 		prefixFlag = true;
@@ -44,15 +46,34 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 			{
 				case 0:
 					if (y == 0)
+					{
 						//NOP
+						NOP();
+					}
 					if (y == 1)
+					{
 						//LD (nn), SP
+						uint16_t n16 = mem_read(pc);
+						++pc;
+						LD_n16_SP(n16);
+					}
 					if (y == 2)
 						//STOP
 					if (y == 3)
+					{
 						//JR d
+						int8_t e8 = mem_read(pc);
+						++pc;
+						JR_e8(e8);
+					}
 					if (y >= 4 && y <= 7)
+					{
 						//JR cc[y-4], d
+						uint8_t idx = y - 4;
+						int8_t e8 = mem_read(pc);
+						++pc;
+						JR_cc_e8(idx, e8);
+					}
 					break;
 				case 1:
 					switch (q)
@@ -62,6 +83,8 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 							break;
 						case 1:
 							//ADD HL, rp[p]
+							uint16_t rp[4] = { r.bc, r.de, r.hl, sp };
+							ADD_HL_r16(rp[p]);
 							break;
 					}
 					break;
@@ -277,8 +300,14 @@ void Cpu::executeCBOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 	}
 }
 
+void Cpu::cycle()
+{
+	fetchOpcode();
+	decodeOpcode(opcode, cb_opcode, prefixFlag);
+}
 
-uint8_t Cpu::mem_read(const uint16_t adr) const
+
+uint16_t Cpu::mem_read(const uint16_t adr) const
 {
 	return memory[adr & 0xFFFF];
 }
@@ -1441,14 +1470,14 @@ void Cpu::CALL_n16(uint16_t n16)
 	JP_n16(n16);
 }
 
-void Cpu::CALL_cc_n16(std::string cc, uint16_t n16)
+void Cpu::CALL_cc_n16(uint8_t cc, uint16_t n16)
 {
 	mCycle += 6;
 
 	uint8_t data1 = static_cast<uint8_t>(n16 >> 8);
 	uint8_t data2 = static_cast<uint8_t>((n16 << 8) >> 8);
 
-	if (cc == "Z")
+	if (cc == 1)
 	{
 		if ((r.f & 0x80) == 0x80)
 		{
@@ -1459,7 +1488,7 @@ void Cpu::CALL_cc_n16(std::string cc, uint16_t n16)
 			JP_n16(n16);
 		}
 	}
-	else if (cc == "NZ")
+	else if (cc == 0)
 	{
 		if ((r.f & 0x80) == 0)
 		{
@@ -1470,7 +1499,7 @@ void Cpu::CALL_cc_n16(std::string cc, uint16_t n16)
 			JP_n16(n16);
 		}
 	}
-	else if (cc == "C")
+	else if (cc == 3)
 	{
 		if ((r.f & 0x10) == 0x10)
 		{
@@ -1481,7 +1510,7 @@ void Cpu::CALL_cc_n16(std::string cc, uint16_t n16)
 			JP_n16(n16);
 		}
 	}
-	else if (cc == "NC")
+	else if (cc == 2)
 	{
 		if ((r.f & 0x10) == 0)
 		{
@@ -1492,7 +1521,7 @@ void Cpu::CALL_cc_n16(std::string cc, uint16_t n16)
 			JP_n16(n16);
 		}
 	}
-	else if (cc == "! cc")
+	else if (cc > 3)
 		mCycle -= 3;
 }
 
@@ -1511,31 +1540,31 @@ void Cpu::JP_n16(uint16_t n16)
 
 }
 
-void Cpu::JP_cc_n16(std::string cc, uint16_t n16)
+void Cpu::JP_cc_n16(uint8_t cc, uint16_t n16)
 {
 	mCycle += 4;
 
-	if (cc == "Z")
+	if (cc == 1)
 	{
 		if ((r.f & 0x80) == 0x80)
 			pc = n16;
 	}
-	else if (cc == "NZ")
+	else if (cc == 0)
 	{
 		if ((r.f & 0x80) == 0)
 			pc = n16;
 	}
-	else if (cc == "C")
+	else if (cc == 3)
 	{
 		if ((r.f & 0x10) == 0x10)
 			pc = n16;
 	}
-	else if (cc == "NC")
+	else if (cc == 2)
 	{
 		if ((r.f & 0x10) == 0)
 			pc = n16;
 	}
-	else if (cc == "! cc")
+	else if (cc > 3)
 		mCycle -= 1;
 }
 
@@ -1546,39 +1575,39 @@ void Cpu::JR_e8(int8_t e8)
 	pc += e8;
 }
 
-void Cpu::JR_cc_e8(std::string cc, int8_t e8)
+void Cpu::JR_cc_e8(uint8_t cc, int8_t e8)
 {
 	mCycle += 3;
 
-	if (cc == "Z")
+	if (cc == 1)
 	{
 		if ((r.f & 0x80) == 0x80)
 			pc += e8;
 	}
-	else if (cc == "NZ")
+	else if (cc == 0)
 	{
 		if ((r.f & 0x80) == 0)
 			pc += e8;
 	}
-	else if (cc == "C")
+	else if (cc == 3)
 	{
 		if ((r.f & 0x10) == 0x10)
 			pc += e8;
 	}
-	else if (cc == "NC")
+	else if (cc == 2)
 	{
 		if ((r.f & 0x10) == 0)
 			pc += e8;
 	}
-	else if (cc == "! cc")
+	else if (cc > 3)
 		mCycle -= 1;
 }
 
-void Cpu::RET_cc(std::string cc)
+void Cpu::RET_cc(uint8_t cc)
 {
 	mCycle += 5;
 
-	if (cc == "Z")
+	if (cc == 1)
 	{
 		if ((r.f & 0x80) == 0x80)
 		{
@@ -1590,7 +1619,7 @@ void Cpu::RET_cc(std::string cc)
 			pc = (msb << 8) | lsb;
 		}
 	}
-	else if (cc == "NZ")
+	else if (cc == 0)
 	{
 		if ((r.f & 0x80) == 0)
 		{
@@ -1602,7 +1631,7 @@ void Cpu::RET_cc(std::string cc)
 			pc = (msb << 8) | lsb;
 		}
 	}
-	else if (cc == "C")
+	else if (cc == 3)
 	{
 		if ((r.f & 0x10) == 0x10)
 		{
@@ -1614,7 +1643,7 @@ void Cpu::RET_cc(std::string cc)
 			pc = (msb << 8) | lsb;
 		}
 	}
-	else if (cc == "NC")
+	else if (cc == 2)
 	{
 		if ((r.f & 0x10) == 0)
 		{
@@ -1626,7 +1655,7 @@ void Cpu::RET_cc(std::string cc)
 			pc = (msb << 8) | lsb;
 		}
 	}
-	else if (cc == "! cc")
+	else if (cc > 3)
 		mCycle -= 3;
 }
 

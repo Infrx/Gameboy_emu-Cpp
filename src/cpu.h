@@ -22,9 +22,10 @@ public:
 	void decodeOpcode(uint8_t opcode, uint8_t cb_opcode, bool prefixFlag);
 	void executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q);
 	void executeCBOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q);
+	void cycle();
 	Registers r;
 private:
-	uint8_t mem_read(const uint16_t adr) const;
+	uint16_t mem_read(const uint16_t adr) const;
 	void mem_write(const uint16_t adr, uint8_t value);
 
 	
@@ -175,15 +176,15 @@ public: //for unit test
 	// Jumps and Subroutines
 
 	void CALL_n16(uint16_t n16);
-	void CALL_cc_n16(std::string cc, uint16_t n16);
+	void CALL_cc_n16(uint8_t cc, uint16_t n16);
 
 	void JP_HL();
 	void JP_n16(uint16_t n16);
-	void JP_cc_n16(std::string cc, uint16_t n16);
+	void JP_cc_n16(uint8_t cc, uint16_t n16);
 	void JR_e8(int8_t e8);
-	void JR_cc_e8(std::string cc, int8_t e8);
+	void JR_cc_e8(uint8_t cc, int8_t e8);
 
-	void RET_cc(std::string cc);
+	void RET_cc(uint8_t cc);
 	void RET();
 	void RETI();
 
