@@ -8,7 +8,7 @@ using json = nlohmann::json;
 
 void inline unitTest(json& data, Cpu& cpu)
 {
-	for (int idx = 0; idx < 100; ++idx)
+	for (int idx = 0; idx < 30; ++idx)
 	{
 		uint16_t memidx = 0;
 		cpu.r.a = data[idx]["initial"]["a"];

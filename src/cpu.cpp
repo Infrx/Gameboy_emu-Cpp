@@ -54,7 +54,7 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					{
 						//LD (nn), SP
 						uint16_t n16 = mem_read(pc);
-						++pc;
+						//++pc;
 						LD_n16_SP(n16);
 					}
 					if (y == 2)
@@ -63,7 +63,7 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					{
 						//JR d
 						int8_t e8 = mem_read(pc);
-						++pc;
+						//++pc;
 						JR_e8(e8);
 					}
 					if (y >= 4 && y <= 7)
@@ -71,7 +71,7 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 						//JR cc[y-4], d
 						uint8_t idx = y - 4;
 						int8_t e8 = mem_read(pc);
-						++pc;
+						//++pc;
 						JR_cc_e8(idx, e8);
 					}
 					break;
@@ -208,12 +208,15 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 							break;
 						case 5:
 							//CPL
+							CPL();
 							break;
 						case 6:
 							//SCF
+							SCF();
 							break;
 						case 7:
 							//CCF
+							CCF();
 							break;
 					}
 					break;
@@ -222,12 +225,17 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 		case 1:
 			if (z == 6 && y == 6)
 			{
-			}//HALT
-			else {}
+				//HALT
+			}
+			else
+			{
 				//LD r[y], r[z]
+				LD_r8_r8(rf[y], rf[z]);
+			}
 			break;
 		case 2:
 			// alu[y] r[z]
+			(this->*ALU_r8[y])(rf[z]);
 			break;
 		case 3:
 			switch (z)
