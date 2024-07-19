@@ -78,14 +78,21 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 				case 1:
 					switch (q)
 					{
+						
 						case 0:
-							//LD rp[p], nn	
+						{
+							//LD rp[p], nn
+							uint16_t n16 = mem_read(pc++) << 8 | mem_read(pc++);
+							LD_r16_n16(rp[p], n16);
+						}
 							break;
 						case 1:
+						{
 							//ADD HL, rp[p]
 							uint16_t rp[4] = { r.bc, r.de, r.hl, sp };
 							ADD_HL_r16(rp[p]);
 							break;
+						}
 					}
 					break;
 				case 2:
@@ -96,15 +103,19 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 							{
 								case 0:
 									//LD (BC), A
+									LD_r16_A(r.bc);
 									break;
 								case 1:
 									//LD (DE), A
+									LD_r16_A(r.de);
 									break;
 								case 2:
 									//LD (HL+), A
+									LD_HLI_A();
 									break;
 								case 3:
 									//LD (HL-), A
+									LD_HLD_A();
 									break;
 							}
 							break;
@@ -112,16 +123,20 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 							switch (p)
 							{
 								case 0:
-									//LD A, (BC)	
+									//LD A, (BC)
+									LD_A_r16(r.bc);
 									break;
 								case 1:
 									//LD A, (HL+)
+									LD_A_HLI();
 									break;
 								case 2:
 									//LD A, (DE)
+									LD_A_r16(r.de);
 									break;
 								case 3:
 									//LD A, (HL-)
+									LD_A_HLD();
 									break;
 							}
 							break;
@@ -130,37 +145,63 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 				case 3:
 					switch (q)
 					{
+						
 						case 0:
-							//INC rp[p]	
+							//INC rp[p]
+							INC_r16(rp[p]);
 							break;
 						case 1:
 							//DEC rp[p]
+							DEC_r16(rp[p]);
 							break;
 					}
 					break;
 				case 4:
-					// NC r[y]
+				{
+					// INC r[y]
+					if (y == 6)
+						INC_HL();
+					else
+						INC_r8(rf[y]);
+				}
 					break;
 				case 5:
-					//DEC r[y]
+				{
+					// DEC r[y]
+					if (y == 6)
+						DEC_HL();
+					else
+						DEC_r8(rf[y]);
+				}
 					break;
 				case 6:
+				{
 					//LD r[y], n
+					uint8_t n8 = mem_read(pc);
+					if (y == 6)
+						LD_HL_n8(n8);
+					else
+						LD_r8_n8(rf[y], n8);
+				}
 					break;
 				case 7:
 					switch (y)
 					{
 						case 0:
 							//RLCA
+							RLCA();
 							break;
 						case 1:
 							//RRCA
+							RRCA();
 							break;
 						case 2:
 							//RLA
+							RLA();
 							break;
 						case 3:
 							//RRA
+							RRA();
 							break;
 						case 4:
 							//DAA

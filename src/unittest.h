@@ -6,7 +6,7 @@
 #include <cpu.h>
 using json = nlohmann::json;
 
-void inline unitTest(json data, Cpu& cpu)
+void inline unitTest(json& data, Cpu& cpu)
 {
 	for (int idx = 0; idx < 100; ++idx)
 	{
@@ -25,6 +25,7 @@ void inline unitTest(json data, Cpu& cpu)
 		cpu.memory[memidx] = data[idx]["initial"]["ram"][0][1];
 
 		cpu.cycle();
+
         std::string testName = data[idx]["name"];
         std::string testNameTemp = testName.substr(0, 2);
         if (testNameTemp == "cb")
@@ -66,7 +67,7 @@ json openFile(std::string file)
 	return data;
 }
 
-const std::vector<std::string> jsonFiles =
+extern const std::vector<std::string> jsonFiles =
 {
         "00.json", "01.json", "02.json", "03.json", "04.json", "05.json", "06.json", "07.json",
         "08.json", "09.json", "0a.json", "0b.json", "0c.json", "0d.json", "0e.json", "0f.json",

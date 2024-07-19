@@ -28,7 +28,9 @@ private:
 	uint16_t mem_read(const uint16_t adr) const;
 	void mem_write(const uint16_t adr, uint8_t value);
 
-	
+	uint16_t rp[4] = { r.bc, r.de, r.hl, sp };
+	uint16_t rp2[4] = { r.bc, r.de, r.hl, r.af };
+	uint8_t rf[8] = {r.b, r.c, r.d, r.e, r.h, r.l, 0, r.a}; //is placeholder for (HL)
 
 	// flag methods
 
