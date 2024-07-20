@@ -11,7 +11,7 @@ public:
 
 	uint8_t opcode;
 	uint8_t cb_opcode;
-	uint8_t memory[65536];
+	uint8_t memory[65536]{ 0 };
 	uint16_t pc;
 	uint16_t sp;
 	bool IME;
@@ -25,12 +25,13 @@ public:
 	void cycle();
 	Registers r;
 private:
-	uint16_t mem_read(const uint16_t adr) const;
+	uint8_t mem_read(const uint16_t& adr) const;
 	void mem_write(const uint16_t adr, uint8_t value);
 
-	uint16_t rp[4] = { r.bc, r.de, r.hl, sp };
-	uint16_t rp2[4] = { r.bc, r.de, r.hl, r.af };
-	uint8_t rf[8] = {r.b, r.c, r.d, r.e, r.h, r.l, 0, r.a}; //is placeholder for (HL)
+	uint16_t* rp[4] = { &r.bc, &r.de, &r.hl, &sp };
+	uint16_t* rp2[4] = { &r.bc, &r.de, &r.hl, &r.af };
+	//uint8_t rf[8] = {r.b, r.c, r.d, r.e, r.h, r.l, 0, r.a}; //is placeholder for (HL)
+	uint8_t* rf[8] = { &r.b, &r.c, &r.d, &r.e, &r.h, &r.l, &r.f, &r.a };
 	uint8_t vec[8] = {0x00,0x08,0x10,0x18,0x20,0x28,0x30,0x38};
 	
 
@@ -48,7 +49,7 @@ private:
 	void setCarryF8(bool flag);
 	void setCarryF16(uint32_t res);
 	void setCarryFBorrow(uint16_t x, uint16_t y);
-	void setHCarryFBorrow(uint16_t x, uint16_t y);
+	void setHCarryFBorrow(uint8_t x, uint8_t y);
 	void setCarryFShift();
 
 	//flag method helpers
@@ -58,7 +59,7 @@ private:
 	bool isHalfCarry8(uint16_t x, uint16_t y);
 	bool isHalfCarry16(uint16_t x, uint16_t y);
 	bool isBorrow8(uint16_t x, uint16_t y);
-	bool isBorrow4(uint16_t x, uint16_t y);
+	bool isBorrow4(uint8_t x, uint8_t y);
 
 public: //for unit test
 	// Instructions
@@ -110,8 +111,8 @@ public: //for unit test
 	// 16-bit Arithmetic Instrucitons
 
 	void ADD_HL_r16(uint16_t r16);
-	void DEC_r16(uint16_t r16);
-	void INC_r16(uint16_t r16);
+	void DEC_r16(uint16_t& r16);
+	void INC_r16(uint16_t& r16);
 
 	// Bit Operations Instructions
 

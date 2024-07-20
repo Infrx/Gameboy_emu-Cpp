@@ -53,8 +53,7 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					if (y == 1)
 					{
 						//LD (nn), SP
-						uint16_t n16 = mem_read(pc);
-						//++pc;
+						uint16_t n16 = mem_read(pc++) | (mem_read(pc++) << 8);
 						LD_n16_SP(n16);
 					}
 					if (y == 2)
@@ -62,16 +61,14 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					if (y == 3)
 					{
 						//JR d
-						int8_t e8 = mem_read(pc);
-						//++pc;
+						int8_t e8 = mem_read(pc++);
 						JR_e8(e8);
 					}
 					if (y >= 4 && y <= 7)
 					{
 						//JR cc[y-4], d
 						uint8_t idx = y - 4;
-						int8_t e8 = mem_read(pc);
-						//++pc;
+						int8_t e8 = mem_read(pc++);
 						JR_cc_e8(idx, e8);
 					}
 					break;
@@ -82,15 +79,14 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 						case 0:
 						{
 							//LD rp[p], nn
-							uint16_t n16 = mem_read(pc++) << 8 | mem_read(pc++);
-							LD_r16_n16(rp[p], n16);
+							uint16_t n16 = mem_read(pc++) | (mem_read(pc++) << 8);
+							LD_r16_n16(*rp[y], n16);
 						}
 							break;
 						case 1:
 						{
 							//ADD HL, rp[p]
-							uint16_t rp[4] = { r.bc, r.de, r.hl, sp };
-							ADD_HL_r16(rp[p]);
+							ADD_HL_r16(*rp[p]);
 							break;
 						}
 					}
@@ -145,14 +141,13 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 				case 3:
 					switch (q)
 					{
-						
 						case 0:
 							//INC rp[p]
-							INC_r16(rp[p]);
+							INC_r16(*rp[p]);
 							break;
 						case 1:
 							//DEC rp[p]
-							DEC_r16(rp[p]);
+							DEC_r16(*rp[p]);
 							break;
 					}
 					break;
@@ -162,7 +157,9 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					if (y == 6)
 						INC_HL();
 					else
-						INC_r8(rf[y]);
+					{
+						INC_r8(*rf[y]);
+					}
 				}
 					break;
 				case 5:
@@ -171,7 +168,7 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					if (y == 6)
 						DEC_HL();
 					else
-						DEC_r8(rf[y]);
+						DEC_r8(*rf[y]);
 				}
 					break;
 				case 6:
@@ -181,7 +178,7 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					if (y == 6)
 						LD_HL_n8(n8);
 					else
-						LD_r8_n8(rf[y], n8);
+						LD_r8_n8(*rf[y], n8);
 				}
 					break;
 				case 7:
@@ -230,12 +227,12 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 			else
 			{
 				//LD r[y], r[z]
-				LD_r8_r8(rf[y], rf[z]);
+				LD_r8_r8(*rf[y], *rf[z]);
 			}
 			break;
 		case 2:
 			// alu[y] r[z]
-			(this->*ALU_r8[y])(rf[z]);
+			(this->*ALU_r8[y])(*rf[z]);
 			break;
 		case 3:
 			switch (z)
@@ -258,7 +255,7 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					{
 						case 0:
 							//POP rp2[p]
-							POP_r16(rp2[p]);
+							POP_r16(*rp2[p]);
 							break;
 						case 1:
 							switch (p)
@@ -338,7 +335,7 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					{
 					case 0:
 						//PUSH rp2[p]
-						PUSH_r16(rp2[p]);
+						PUSH_r16(*rp2[p]);
 						break;
 					case 1:
 						if (p == 0)
@@ -350,7 +347,7 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 						break;
 					}
 					break;
-				case 6:
+				case 6: 
 				{
 					//alu[y] n
 					uint8_t n8 = mem_read(pc++);
@@ -396,7 +393,7 @@ void Cpu::cycle()
 }
 
 
-uint16_t Cpu::mem_read(const uint16_t adr) const
+uint8_t Cpu::mem_read(const uint16_t& adr) const
 {
 	return memory[adr & 0xFFFF];
 }
@@ -484,11 +481,11 @@ void Cpu::setCarryFBorrow(uint16_t x, uint16_t y)
 		this->r.f |= 0x10;
 }
 
-void Cpu::setHCarryFBorrow(uint16_t x, uint16_t y)
+void Cpu::setHCarryFBorrow(uint8_t x, uint8_t y)
 {
-	r.f &= ~0x10;
+	r.f &= ~0x20;
 	if (isBorrow4(x, y))
-		this->r.f |= 0x10;
+		this->r.f |= 0x20;
 }
 
 void Cpu::setCarryFShift()
@@ -508,7 +505,7 @@ bool Cpu::is16bCarry(uint32_t res)
 
 bool Cpu::isHalfCarry8(uint16_t x, uint16_t y)
 {
-	return ((x < 0xF) && (y < 0xF) && ((x + y) > 0xF) );
+	return ((x & 0xF) + (y & 0xF) > 0xF) ;
 }
 
 bool Cpu::isHalfCarry16(uint16_t x, uint16_t y)
@@ -521,9 +518,9 @@ bool Cpu::isBorrow8(uint16_t x, uint16_t y)
 	return (x < y);  // y is r8 or r8 + carry
 }
 
-bool Cpu::isBorrow4(uint16_t x, uint16_t y)
+bool Cpu::isBorrow4(uint8_t x, uint8_t y)
 {
-	return ((x > 0xF && ((x - y) < 0xF)));
+	return (x < y); 
 }
 
 void Cpu::ADC_A_r8(uint8_t& r8)
@@ -873,14 +870,14 @@ void Cpu::ADD_HL_r16(uint16_t r16)
 	r.hl = res & 0xFFFF;
 }
 
-void Cpu::DEC_r16(uint16_t r16)
+void Cpu::DEC_r16(uint16_t& r16)
 {
 	mCycle += 2;
 
 	r16 -= 1;
 }
 
-void Cpu::INC_r16(uint16_t r16)
+void Cpu::INC_r16(uint16_t& r16)
 {
 	mCycle += 2;
 
