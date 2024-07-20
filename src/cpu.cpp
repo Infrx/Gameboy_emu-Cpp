@@ -243,6 +243,7 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 				case 0:
 					if (0 >= 0 && y <= 3)
 						//RET cc[y]
+						RET_cc(y);
 					if (y == 4)
 						//LD (0xFF00 + n), A
 					if (y == 5)
@@ -257,21 +258,26 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					{
 						case 0:
 							//POP rp2[p]
+							POP_r16(rp2[p]);
 							break;
 						case 1:
 							switch (p)
 							{
 							case 0:
 								//RET
+								RET();
 								break;
 							case 1:
 								//RETI
+								RETI();
 								break;
 							case 2:
 								//JP HL
+								JP_HL();
 								break;
 							case 3:
 								//LD SP, HL
+								LD_SP_HL();
 								break;
 							}
 							break;
@@ -279,47 +285,81 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					break;
 				case 2:
 					if (0 >= 0 && y <= 3)
+					{
 						//JP cc[y], nn
+						uint16_t n16 = mem_read(pc++) << 8 | mem_read(pc++);
+						JP_cc_n16(y, n16);
+					}
 					if (y == 4)
 						//LD (0xFF00+C), A
 					if (y == 5)
+					{
 						//LD (nn), A
+						uint16_t n16 = mem_read(pc++) << 8 | mem_read(pc++);
+						LD_n16_A(n16);
+					}
 					if (y == 6)
 						//LD A, (0xFF00+C)
+						LDH_A_C();
 					if (y == 7)
+					{
 						//LD A, (nn)
+						uint16_t n16 = mem_read(pc++) << 8 | mem_read(pc++);
+						LD_A_n16(n16);
+					}
 					break;
 				case 3:
 					if (y == 0)
+					{
 						//JP nn
+						uint16_t n16 = mem_read(pc++) << 8 | mem_read(pc++);
+						JP_n16(n16);
+					}
 					if (y == 1)
 						//(CB prefix)
+						std::cout << "CB prefix" << std::endl;
 					if (y == 6)
 						//DI
+						DI();
 					if (y == 7)
 						//EI
+						EI();
 					break;
 				case 4:
 					if (0 >= 0 && y <= 3)
+					{
 						//CALL cc[y], nn
+						uint16_t n16 = mem_read(pc++) << 8 | mem_read(pc++);
+						CALL_cc_n16(y, n16);
+					}
 					break;
 				case 5:
 					switch (q)
 					{
 					case 0:
 						//PUSH rp2[p]
+						PUSH_r16(rp2[p]);
 						break;
 					case 1:
 						if (p == 0)
+						{
 							// CALL nn
+							uint16_t n16 = mem_read(pc++) << 8 | mem_read(pc++);
+							CALL_n16(n16);
+						}
 						break;
 					}
 					break;
 				case 6:
+				{
 					//alu[y] n
+					uint8_t n8 = mem_read(pc++);
+					(this->*ALU_r8[y])(n8);
+				}
 					break;
 				case 7:
 					//RST y * 8
+					RST_vec(vec[y]);
 					break;
 			}
 			break;

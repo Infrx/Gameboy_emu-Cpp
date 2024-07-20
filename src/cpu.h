@@ -31,7 +31,7 @@ private:
 	uint16_t rp[4] = { r.bc, r.de, r.hl, sp };
 	uint16_t rp2[4] = { r.bc, r.de, r.hl, r.af };
 	uint8_t rf[8] = {r.b, r.c, r.d, r.e, r.h, r.l, 0, r.a}; //is placeholder for (HL)
-	
+	uint8_t vec[8] = {0x00,0x08,0x10,0x18,0x20,0x28,0x30,0x38};
 	
 
 
