@@ -57,7 +57,9 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 						LD_n16_SP(n16);
 					}
 					if (y == 2)
+					{
 						//STOP
+					}
 					if (y == 3)
 					{
 						//JR d
@@ -80,7 +82,7 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 						{
 							//LD rp[p], nn
 							uint16_t n16 = mem_read(pc++) | (mem_read(pc++) << 8);
-							LD_r16_n16(*rp[y], n16);
+							LD_r16_n16(*rp[p], n16);
 						}
 							break;
 						case 1:
@@ -174,7 +176,7 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 				case 6:
 				{
 					//LD r[y], n
-					uint8_t n8 = mem_read(pc);
+					uint8_t n8 = mem_read(pc++);
 					if (y == 6)
 						LD_HL_n8(n8);
 					else
@@ -242,13 +244,21 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 						//RET cc[y]
 						RET_cc(y);
 					if (y == 4)
+					{
 						//LD (0xFF00 + n), A
+					}
 					if (y == 5)
+					{
 						//ADD SP, d
+					}
 					if (y == 6)
+					{
 						//LD A, (0xFF00 + n)
+					}
 					if (y == 7)
+					{
 						//LD HL, SP+ d
+					}
 					break;
 				case 1:
 					switch (q)
@@ -515,12 +525,12 @@ bool Cpu::isHalfCarry16(uint16_t x, uint16_t y)
 
 bool Cpu::isBorrow8(uint16_t x, uint16_t y)
 {
-	return (x < y);  // y is r8 or r8 + carry
+	return ((x & 0xFF) < (y & 0xFF));  // y is r8 or r8 + carry
 }
 
 bool Cpu::isBorrow4(uint8_t x, uint8_t y)
 {
-	return (x < y); 
+	return ((x & 0xF) < (y & 0xF) ); 
 }
 
 void Cpu::ADC_A_r8(uint8_t& r8)
@@ -675,7 +685,7 @@ void Cpu::DEC_r8(uint8_t& r8)
 {
 	mCycle += 1;
 
-	uint16_t res = r8 - 1;
+	uint8_t res = r8 - 1;
 	setZeroF(res);
 	setSubsF(true);
 	setHCarryFBorrow(r8, 1);
@@ -698,7 +708,7 @@ void Cpu::INC_r8(uint8_t& r8)
 {
 	mCycle += 1;
 
-	uint16_t res = r8 + 1;
+	uint8_t res = r8 + 1;
 	setZeroF(res);
 	setSubsF(false);
 	setHCarryF8(r8, 1);
@@ -999,9 +1009,10 @@ void Cpu::RLA()
 	mCycle += 2;
 
 	uint8_t b7 = r.a & 0x80;
+	uint8_t b0 = r.f & 0x10;
 	bool flag = static_cast<bool>(b7);
-	uint8_t res = (r.a << 1);
-	r.f |= 0x80; // setZeroF(res); use overload
+	uint8_t res = (r.a << 1) | uint8_t(bool(b0));
+	r.f &= ~0x80; // setZeroF(res); use overload
 	setSubsF(false);
 	setHCarryF8(false);
 	setCarryF8(flag);
@@ -1050,7 +1061,7 @@ void Cpu::RLCA()
 	uint8_t res = (r.a << 1);
 	if (flag)
 		res |= 0x01;
-	r.f |= 0x80; // setZeroF(res); use overload
+	r.f &= ~0x80; // setZeroF(res); use overload
 	setSubsF(false);
 	setHCarryF8(false);
 	setCarryF8(flag);
@@ -1142,7 +1153,7 @@ void Cpu::RRCA()
 	uint8_t res = (r.a >> 1);
 	if (flag)
 		res |= 0x80;
-	r.f |= 0x80; // setZeroF(res); use overload
+	r.f &= ~0x80; // setZeroF(res); use overload
 	setSubsF(false);
 	setHCarryF8(false);
 	setCarryF8(flag);

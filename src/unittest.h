@@ -21,7 +21,7 @@ void initializeMemory(const std::vector<std::vector<int>>& ramData, Cpu& cpu)
 }
 void inline unitTest(json& data, Cpu& cpu)
 {
-	for (int idx = 0; idx < 30; ++idx)
+	for (int idx = 0; idx < 300; ++idx)
 	{
 		uint16_t memidx = 0;
 		cpu.r.a = data[idx]["initial"]["a"];
@@ -43,31 +43,32 @@ void inline unitTest(json& data, Cpu& cpu)
 
         std::string testName = data[idx]["name"];
         std::string testNameTemp = testName.substr(0, 2);
+        std::string testNo = testName.substr(3, 5);
         if (testNameTemp == "cb")
             testName = testName.substr(0, 5);
         else
             testName = testNameTemp;
 
 		if (cpu.r.a != data[idx]["final"]["a"])
-			std::cout << "a is wrong at test 0x" << testName << " test no: " << idx << std::endl;
+			std::cout << "a is wrong at test 0x" << testName << " test no: " << testNo << "/   " << int(cpu.r.a) << " != " << data[idx]["final"]["a"] << std::endl;
 		if (cpu.r.b != data[idx]["final"]["b"])
-			std::cout << "b is wrong at test 0x" << testName << " test no: " << idx << "/   " << int(cpu.r.b) << " != " << data[idx]["final"]["b"] << std::endl;
+			std::cout << "b is wrong at test 0x" << testName << " test no: " << testNo << "/   " << int(cpu.r.b) << " != " << data[idx]["final"]["b"] << std::endl;
 		if (cpu.r.c != data[idx]["final"]["c"])
-			std::cout << "c is wrong at test 0x" << testName << " test no: " << idx << std::endl;
+			std::cout << "c is wrong at test 0x" << testName << " test no: " << testNo << "/   " << int(cpu.r.c) << " != " << data[idx]["final"]["c"] << std::endl;
 		if (cpu.r.d != data[idx]["final"]["d"])
-			std::cout << "d is wrong at test 0x" << testName << " test no: " << idx << std::endl;
+			std::cout << "d is wrong at test 0x" << testName << " test no: " << testNo << "/   " << int(cpu.r.d) << " != " << data[idx]["final"]["d"] << std::endl;
 		if (cpu.r.e != data[idx]["final"]["e"])
-			std::cout << "f is wrong at test 0x" << testName << " test no: " << idx << "/   " << int(cpu.r.e) << " != " << data[idx]["final"]["e"] << std::endl;
+			std::cout << "e is wrong at test 0x" << testName << " test no: " << testNo << "/   " << int(cpu.r.e) << " != " << data[idx]["final"]["e"] << std::endl;
 		if (cpu.r.f != data[idx]["final"]["f"])
-			std::cout << "f is wrong at test 0x" << testName << " test no: " << idx << "/   " << int(cpu.r.f) << " != " << data[idx]["final"]["f"] << std::endl;
+			std::cout << "f is wrong at test 0x" << testName << " test no: " << testNo << "/   " << int(cpu.r.f) << " != " << data[idx]["final"]["f"] << std::endl;
 		if (cpu.r.h != data[idx]["final"]["h"])
-			std::cout << "h is wrong at test 0x" << testName << " test no: " << idx << std::endl;
+			std::cout << "h is wrong at test 0x" << testName << " test no: " << testNo << "/   " << int(cpu.r.h) << " != " << data[idx]["final"]["h"] << std::endl;
 		if (cpu.r.l != data[idx]["final"]["l"])
-			std::cout << "l is wrong at test 0x" << testName << " test no: " << idx << std::endl;
+			std::cout << "l is wrong at test 0x" << testName << " test no: " << testNo << "/   " << int(cpu.r.l) << " != " << data[idx]["final"]["l"] << std::endl;
 		if (cpu.pc != data[idx]["final"]["pc"])
-			std::cout << "pc is wrong at test 0x" << testName << " test no: " << idx << std::endl;
+			std::cout << "pc is wrong at test 0x" << testName << " test no: " << testNo << "/   " << int(cpu.pc) << " != " << data[idx]["final"]["pc"] << std::endl;
 		if (cpu.sp != data[idx]["final"]["sp"])
-			std::cout << "sp is wrong at test 0x" << testName << " test no: " << idx << std::endl;
+			std::cout << "sp is wrong at test 0x" << testName << " test no: " << testNo << "/   " << int(cpu.sp) << " != " << data[idx]["final"]["sp"] << std::endl;
 	}
 }
 
