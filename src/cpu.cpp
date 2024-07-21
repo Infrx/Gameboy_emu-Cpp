@@ -39,6 +39,13 @@ void Cpu::decodeOpcode(uint8_t opcode, uint8_t cb_opcode, bool prefixFlag)
 
 void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 {
+	/*
+	std::cout << "x = " << int(x) << std::endl;
+	std::cout << "y = " << int(y) << std::endl;
+	std::cout << "z = " << int(z) << std::endl;
+	std::cout << "p = " << int(p) << std::endl;
+	std::cout << "q = " << int(q) << std::endl;
+	*/
 	switch (x)
 	{
 		case 0:
@@ -125,12 +132,12 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 									LD_A_r16(r.bc);
 									break;
 								case 1:
-									//LD A, (HL+)
-									LD_A_HLI();
-									break;
-								case 2:
 									//LD A, (DE)
 									LD_A_r16(r.de);
+									break;
+								case 2:
+									//LD A, (HL+)
+									LD_A_HLI();
 									break;
 								case 3:
 									//LD A, (HL-)
@@ -204,6 +211,7 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 							break;
 						case 4:
 							//DAA
+							DAA();
 							break;
 						case 5:
 							//CPL
@@ -229,12 +237,21 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 			else
 			{
 				//LD r[y], r[z]
-				LD_r8_r8(*rf[y], *rf[z]);
+				if (z == 6)
+					LD_r8_HL(*rf[y]);
+				else if (y != 6)
+					LD_r8_r8(*rf[y], *rf[z]);
+				if (y == 6)
+					LD_HL_r8(*rf[z]);
+
 			}
 			break;
 		case 2:
 			// alu[y] r[z]
-			(this->*ALU_r8[y])(*rf[z]);
+			if (z == 6)
+				(this->*ALU_r8_HL[y])();
+			else
+				(this->*ALU_r8[y])(*rf[z]);
 			break;
 		case 3:
 			switch (z)
@@ -246,18 +263,26 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					if (y == 4)
 					{
 						//LD (0xFF00 + n), A
+						uint16_t n16 = mem_read(pc++) | (mem_read(pc++) << 8);
+						LDH_n16_A(n16);
 					}
 					if (y == 5)
 					{
 						//ADD SP, d
+						int8_t e8 = mem_read(pc++);
+						ADD_SP_e8(e8);
 					}
 					if (y == 6)
 					{
 						//LD A, (0xFF00 + n)
+						uint16_t n16 = mem_read(pc++) | (mem_read(pc++) << 8);
+						LDH_A_n16(n16);
 					}
 					if (y == 7)
 					{
 						//LD HL, SP+ d
+						int8_t e8 = mem_read(pc++);
+						LD_HL_SP_e8(e8);
 					}
 					break;
 				case 1:
@@ -298,7 +323,10 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 						JP_cc_n16(y, n16);
 					}
 					if (y == 4)
+					{
 						//LD (0xFF00+C), A
+						LDH_C_A();
+					}
 					if (y == 5)
 					{
 						//LD (nn), A
@@ -306,8 +334,10 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 						LD_n16_A(n16);
 					}
 					if (y == 6)
+					{
 						//LD A, (0xFF00+C)
 						LDH_A_C();
+					}
 					if (y == 7)
 					{
 						//LD A, (nn)
@@ -435,6 +465,13 @@ void Cpu::setHCarryF8(uint16_t x, uint16_t y)
 		this->r.f |= 0x20;
 }
 
+void Cpu::setHCarryF8(uint8_t x, uint8_t y, bool c)
+{
+	r.f &= ~0x20;
+	if (isHalfCarry8(x, y, c))
+		this->r.f |= 0x20;
+}
+
 void Cpu::setHCarryF16(uint16_t x, uint16_t y)
 {
 	r.f &= ~0x20;
@@ -518,6 +555,11 @@ bool Cpu::isHalfCarry8(uint16_t x, uint16_t y)
 	return ((x & 0xF) + (y & 0xF) > 0xF) ;
 }
 
+bool Cpu::isHalfCarry8(uint8_t x, uint8_t y, bool c)
+{
+	return ((x & 0xF) + (y & 0xF) + c > 0xF);
+}
+
 bool Cpu::isHalfCarry16(uint16_t x, uint16_t y)
 {
 	return (((x & 0xFFF) + (y & 0xFFF) ) > 0xFFF);
@@ -537,11 +579,12 @@ void Cpu::ADC_A_r8(uint8_t& r8)
 {
 	mCycle += 1;
 
-	uint8_t fCarry = static_cast<uint8_t>((r.f & 0x10) == 0x10);
+	//uint8_t fCarry = static_cast<uint8_t>((r.f & 0x10) == 0x10);
+	bool fCarry = r.f & 0x10;
 	uint32_t res = r.a + r8 + fCarry;
-	setZeroF(res);
+	setZeroF(uint8_t(res));
 	setSubsF(false); 
-	setHCarryF8(r.a, (r8 + fCarry));
+	setHCarryF8(r.a, r8, fCarry);
 	setCarryF8(res);
 	r.a = res & 0xFF;
 }
@@ -551,11 +594,11 @@ void Cpu::ADC_A_HL()
 	mCycle += 2;
 
 	uint8_t data = mem_read(r.hl);
-	uint8_t fCarry = static_cast<uint8_t>((r.f & 0x10) == 0x10);
+	bool fCarry = r.f & 0x10;
 	uint32_t res = r.a + data + fCarry;
-	setZeroF(res);
+	setZeroF(uint8_t(res));
 	setSubsF(false);
-	setHCarryF8(r.a, (data + fCarry));
+	setHCarryF8(r.a, data, fCarry);
 	setCarryF8(res);
 	r.a = res & 0xFF;
 }
@@ -564,10 +607,10 @@ void Cpu::ADC_A_n8(uint8_t n8)
 {
 	mCycle += 2;
 
-	uint8_t fCarry = static_cast<uint8_t>((r.f & 0x10) == 0x10);
+	bool fCarry = r.f & 0x10;
 	uint32_t res = r.a + n8 + fCarry; 
 	setSubsF(false);
-	setHCarryF8(r.a, (n8 + fCarry));
+	setHCarryF8(r.a, n8, fCarry);
 	setCarryF8(res);
 	r.a = res & 0xFF;
 }
@@ -577,7 +620,7 @@ void Cpu::ADD_A_r8(uint8_t& r8)
 	mCycle += 1;
 
 	uint16_t res = r.a + r8;
-	setZeroF(res);
+	setZeroF(uint8_t(res));
 	setSubsF(false);
 	setHCarryF8(r.a, r8);
 	setCarryF8(res);
@@ -590,9 +633,9 @@ void Cpu::ADD_A_HL()
 
 	uint8_t data = mem_read(r.hl);
 	uint16_t res = r.a + data;
-	setZeroF(res);
+	setZeroF(uint8_t(res));
 	setSubsF(false);
-	setHCarryF8(r.a, data );
+	setHCarryF8(r.a, data);
 	setCarryF8(res);
 	r.a = res & 0xFF;
 }
@@ -769,6 +812,7 @@ void Cpu::SBC_A_r8(uint8_t& r8)
 
 	uint8_t fCarry = static_cast<uint8_t>((r.f & 0x10) == 0x10);
 	uint32_t res = r.a - (r8 + fCarry);
+	setZeroF(res);
 	setSubsF(true);
 	setHCarryFBorrow(r.a, (r8 + fCarry));
 	setCarryFBorrow(r.a, (r8 + fCarry));
@@ -781,6 +825,7 @@ void Cpu::SBC_A_HL()
 	uint8_t data = mem_read(r.hl);
 	uint8_t fCarry = static_cast<uint8_t>((r.f & 0x10) == 0x10);
 	uint32_t res = r.a - (data + fCarry);
+	setZeroF(res);
 	setSubsF(true);
 	setHCarryFBorrow(r.a, (data + fCarry));
 	setCarryFBorrow(r.a, (data + fCarry));
@@ -793,6 +838,7 @@ void Cpu::SBC_A_n8(uint8_t n8)
 
 	uint8_t fCarry = static_cast<uint8_t>((r.f & 0x10) == 0x10);
 	uint32_t res = r.a - (n8 + fCarry);
+	setZeroF(uint8_t(res));
 	setSubsF(true);
 	setHCarryFBorrow(r.a, (n8 + fCarry));
 	setCarryFBorrow(r.a, (n8 + fCarry));
@@ -1102,9 +1148,15 @@ void Cpu::RRA()
 	mCycle += 2;
 
 	uint8_t b0 = r.a & 0x01;
-	bool flag = static_cast<bool>(b0);
+	uint8_t b7 = r.f & 0x10;
 	uint8_t res = (r.a >> 1);
-	r.f |= 0x80; // setZeroF(res); use overload
+	if (b7)
+	{
+		b7 = 0x80;
+		res |= b7;
+	}
+	bool flag = static_cast<bool>(b0);
+	r.f &= ~0x80; // setZeroF(res); use overload
 	setSubsF(false);
 	setHCarryF8(false);
 	setCarryF8(flag);
@@ -1358,7 +1410,7 @@ void Cpu::LD_HLI_A()
 {
 	mCycle += 2;
 	
-	r.a = mem_read(r.hl);
+	mem_write(r.hl,r.a);
 	++r.hl;
 }
 
@@ -1366,7 +1418,7 @@ void Cpu::LD_HLD_A()
 {
 	mCycle += 2;
 
-	r.a = mem_read(r.hl);
+	mem_write(r.hl, r.a);
 	--r.hl;
 }
 
@@ -1374,7 +1426,7 @@ void Cpu::LD_A_HLI()
 {
 	mCycle += 2;
 
-	mem_write(r.hl, r.a);
+	r.a = mem_read(r.hl);
 	++r.hl;
 }
 
@@ -1382,7 +1434,7 @@ void Cpu::LD_A_HLD()
 {
 	mCycle += 2;
 
-	mem_write(r.hl, r.a);
+	r.a = mem_read(r.hl);
 	--r.hl;
 }
 
@@ -1508,7 +1560,7 @@ void Cpu::CCF()
 
 	setSubsF(false);
 	setHCarryF8(false);
-	if ((r.f & 0x10) == 1)
+	if ((r.f & 0x10))
 		setCarryF8(false);
 	else
 		setCarryF8(true);
@@ -1521,6 +1573,49 @@ void Cpu::CPL()
 	r.a = ~r.a;
 	setSubsF(true);
 	setHCarryF8(true);
+}
+
+void Cpu::DAA()
+{
+	uint8_t correction = 0;
+	bool setCarry = r.f & 0x10;
+	if (!(r.f & 0x40)) 
+	{
+		if ((r.f & 0x20) || (r.a & 0x0F) > 9)
+		{
+			correction |= 0x06;
+		}
+		if ((r.f & 0x10) || r.a > 0x99) 
+		{
+			correction |= 0x60;
+			setCarry = true;
+		}
+	}
+	else 
+	{
+		if ((r.f & 0x20))
+		{
+			correction |= 0x06;
+		}
+		if ((r.f & 0x10)) {
+			correction |= 0x60;
+		}
+	}
+
+	// Apply correction
+	r.a += ((r.f & 0x40) ? -correction : correction);
+
+	// Update flags
+	r.f &= ~0x20;
+	if (setCarry)
+		r.f |= 0x10;
+	else
+		r.f &= ~0x10;
+	if (r.a == 0)
+
+		r.f |= 0x80;
+	else
+		r.f &= ~0x80;
 }
 
 

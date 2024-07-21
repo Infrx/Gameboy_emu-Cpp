@@ -32,6 +32,7 @@ private:
 	uint16_t* rp2[4] = { &r.bc, &r.de, &r.hl, &r.af };
 	//uint8_t rf[8] = {r.b, r.c, r.d, r.e, r.h, r.l, 0, r.a}; //is placeholder for (HL)
 	uint8_t* rf[8] = { &r.b, &r.c, &r.d, &r.e, &r.h, &r.l, &r.f, &r.a };
+	uint16_t* HL = &r.hl;
 	uint8_t vec[8] = {0x00,0x08,0x10,0x18,0x20,0x28,0x30,0x38};
 	
 
@@ -41,6 +42,9 @@ private:
 	void setZeroF(uint32_t res);
 	void setSubsF(bool subs); // bFlag is false for 8 bit true for 16 bit
 	void setHCarryF8(uint16_t x, uint16_t y);
+
+	void setHCarryF8(uint8_t x, uint8_t y, bool c);
+
 	void setHCarryF16(uint16_t x, uint16_t y);
 	void setHCarryF8(bool flag);
 	void setHCarryF16(bool flag);
@@ -57,6 +61,7 @@ private:
 	bool is8bCarry(uint16_t res);
 	bool is16bCarry(uint32_t res);
 	bool isHalfCarry8(uint16_t x, uint16_t y);
+	bool isHalfCarry8(uint8_t x, uint8_t y, bool c);
 	bool isHalfCarry16(uint16_t x, uint16_t y);
 	bool isBorrow8(uint16_t x, uint16_t y);
 	bool isBorrow4(uint8_t x, uint8_t y);
@@ -229,4 +234,7 @@ public: //for unit test
 
 	typedef void (Cpu::*functionPointer)(uint8_t &r8);
 	functionPointer ALU_r8[8] = { &Cpu::ADD_A_r8, &Cpu::ADC_A_r8, &Cpu::SUB_A_r8, &Cpu::SBC_A_r8, &Cpu::AND_A_r8, &Cpu::XOR_A_r8, &Cpu::OR_A_r8, &Cpu::CP_A_r8 };
+
+	typedef void (Cpu::* functionPointerHL)();
+	functionPointerHL ALU_r8_HL[8] = { &Cpu::ADD_A_HL, &Cpu::ADC_A_HL, &Cpu::SUB_A_HL, &Cpu::SBC_A_HL, &Cpu::AND_A_HL, &Cpu::XOR_A_HL, &Cpu::OR_A_HL, &Cpu::CP_A_HL };
 };
