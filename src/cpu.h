@@ -42,9 +42,7 @@ private:
 	void setZeroF(uint32_t res);
 	void setSubsF(bool subs); // bFlag is false for 8 bit true for 16 bit
 	void setHCarryF8(uint16_t x, uint16_t y);
-
 	void setHCarryF8(uint8_t x, uint8_t y, bool c);
-
 	void setHCarryF16(uint16_t x, uint16_t y);
 	void setHCarryF8(bool flag);
 	void setHCarryF16(bool flag);
@@ -53,7 +51,9 @@ private:
 	void setCarryF8(bool flag);
 	void setCarryF16(uint32_t res);
 	void setCarryFBorrow(uint16_t x, uint16_t y);
+	void setCarryFBorrow(uint16_t x, uint16_t y, bool c);
 	void setHCarryFBorrow(uint8_t x, uint8_t y);
+	void setHCarryFBorrow(uint8_t x, uint8_t y, bool c);
 	void setCarryFShift();
 
 	//flag method helpers
@@ -64,8 +64,9 @@ private:
 	bool isHalfCarry8(uint8_t x, uint8_t y, bool c);
 	bool isHalfCarry16(uint16_t x, uint16_t y);
 	bool isBorrow8(uint16_t x, uint16_t y);
+	bool isBorrow8(uint16_t x, uint16_t y, bool c);
 	bool isBorrow4(uint8_t x, uint8_t y);
-
+	bool isBorrow4(uint8_t x, uint8_t y, bool c);
 public: //for unit test
 	// Instructions
 	// 
@@ -170,13 +171,13 @@ public: //for unit test
 	void LD_r16_A(uint16_t& r16);
 	void LD_n16_A(uint16_t n16);
 
-	void LDH_n16_A(uint16_t n16);
+	void LDH_n16_A(uint8_t n8);
 	void LDH_C_A();
 
 	void LD_A_r16(uint16_t& r16);
 	void LD_A_n16(uint16_t n16);
 
-	void LDH_A_n16(uint16_t n16);
+	void LDH_A_n16(uint8_t n8);
 	void LDH_A_C();
 
 	void LD_HLI_A();

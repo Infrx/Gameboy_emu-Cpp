@@ -21,7 +21,7 @@ void initializeMemory(const std::vector<std::vector<int>>& ramData, Cpu& cpu)
 }
 void inline unitTest(json& data, Cpu& cpu)
 {
-	for (int idx = 0; idx < 300; ++idx)
+	for (int idx = 0; idx < 500; ++idx)
 	{
 		uint16_t memidx = 0;
 		cpu.r.a = data[idx]["initial"]["a"];

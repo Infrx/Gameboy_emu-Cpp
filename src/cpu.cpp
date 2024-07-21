@@ -263,8 +263,8 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					if (y == 4)
 					{
 						//LD (0xFF00 + n), A
-						uint16_t n16 = mem_read(pc++) | (mem_read(pc++) << 8);
-						LDH_n16_A(n16);
+						uint8_t n8 = mem_read(pc++);
+						LDH_n16_A(n8);
 					}
 					if (y == 5)
 					{
@@ -275,8 +275,8 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					if (y == 6)
 					{
 						//LD A, (0xFF00 + n)
-						uint16_t n16 = mem_read(pc++) | (mem_read(pc++) << 8);
-						LDH_A_n16(n16);
+						uint8_t n8 = mem_read(pc++);
+						LDH_A_n16(n8);
 					}
 					if (y == 7)
 					{
@@ -290,7 +290,10 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					{
 						case 0:
 							//POP rp2[p]
-							POP_r16(*rp2[p]);
+							if (p == 3)
+								POP_AF();
+							else
+								POP_r16(*rp2[p]);
 							break;
 						case 1:
 							switch (p)
@@ -319,7 +322,7 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					if (0 >= 0 && y <= 3)
 					{
 						//JP cc[y], nn
-						uint16_t n16 = mem_read(pc++) << 8 | mem_read(pc++);
+						uint16_t n16 = mem_read(pc++) | (mem_read(pc++) << 8);
 						JP_cc_n16(y, n16);
 					}
 					if (y == 4)
@@ -330,7 +333,7 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					if (y == 5)
 					{
 						//LD (nn), A
-						uint16_t n16 = mem_read(pc++) << 8 | mem_read(pc++);
+						uint16_t n16 = mem_read(pc++) | (mem_read(pc++) << 8);
 						LD_n16_A(n16);
 					}
 					if (y == 6)
@@ -341,7 +344,7 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					if (y == 7)
 					{
 						//LD A, (nn)
-						uint16_t n16 = mem_read(pc++) << 8 | mem_read(pc++);
+						uint16_t n16 = mem_read(pc++) | (mem_read(pc++) << 8);
 						LD_A_n16(n16);
 					}
 					break;
@@ -349,7 +352,7 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					if (y == 0)
 					{
 						//JP nn
-						uint16_t n16 = mem_read(pc++) << 8 | mem_read(pc++);
+						uint16_t n16 = mem_read(pc++) | (mem_read(pc++) << 8);
 						JP_n16(n16);
 					}
 					if (y == 1)
@@ -366,7 +369,7 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					if (0 >= 0 && y <= 3)
 					{
 						//CALL cc[y], nn
-						uint16_t n16 = mem_read(pc++) << 8 | mem_read(pc++);
+						uint16_t n16 = mem_read(pc++) | (mem_read(pc++) << 8);
 						CALL_cc_n16(y, n16);
 					}
 					break;
@@ -381,7 +384,7 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 						if (p == 0)
 						{
 							// CALL nn
-							uint16_t n16 = mem_read(pc++) << 8 | mem_read(pc++);
+							uint16_t n16 = mem_read(pc++) | (mem_read(pc++) << 8);
 							CALL_n16(n16);
 						}
 						break;
@@ -528,10 +531,24 @@ void Cpu::setCarryFBorrow(uint16_t x, uint16_t y)
 		this->r.f |= 0x10;
 }
 
+void Cpu::setCarryFBorrow(uint16_t x, uint16_t y, bool c)
+{
+	r.f &= ~0x10;
+	if (isBorrow8(x, y, c))
+		this->r.f |= 0x10;
+}
+
 void Cpu::setHCarryFBorrow(uint8_t x, uint8_t y)
 {
 	r.f &= ~0x20;
 	if (isBorrow4(x, y))
+		this->r.f |= 0x20;
+}
+
+void Cpu::setHCarryFBorrow(uint8_t x, uint8_t y, bool c)
+{
+	r.f &= ~0x20;
+	if (isBorrow4(x, y, c))
 		this->r.f |= 0x20;
 }
 
@@ -567,12 +584,22 @@ bool Cpu::isHalfCarry16(uint16_t x, uint16_t y)
 
 bool Cpu::isBorrow8(uint16_t x, uint16_t y)
 {
-	return ((x & 0xFF) < (y & 0xFF));  // y is r8 or r8 + carry
+	return ((x & 0xFF) < (y & 0xFF));  
+}
+
+bool Cpu::isBorrow8(uint16_t x, uint16_t y, bool c)
+{
+	return ((x & 0xFF) < ((y & 0xFF) + c));
 }
 
 bool Cpu::isBorrow4(uint8_t x, uint8_t y)
 {
 	return ((x & 0xF) < (y & 0xF) ); 
+}
+
+bool Cpu::isBorrow4(uint8_t x, uint8_t y, bool c)
+{
+	return ((x & 0xF) < ((y & 0xF) + c ));
 }
 
 void Cpu::ADC_A_r8(uint8_t& r8)
@@ -810,12 +837,12 @@ void Cpu::SBC_A_r8(uint8_t& r8)
 {
 	mCycle += 1;
 
-	uint8_t fCarry = static_cast<uint8_t>((r.f & 0x10) == 0x10);
-	uint32_t res = r.a - (r8 + fCarry);
+	bool fCarry = r.f & 0x10;
+	uint8_t res = r.a - (r8 + fCarry);
 	setZeroF(res);
 	setSubsF(true);
-	setHCarryFBorrow(r.a, (r8 + fCarry));
-	setCarryFBorrow(r.a, (r8 + fCarry));
+	setHCarryFBorrow(r.a, r8, fCarry);
+	setCarryFBorrow(r.a, r8, fCarry);
 	r.a = res & 0xFF;
 }
 
@@ -823,12 +850,12 @@ void Cpu::SBC_A_HL()
 {
 	mCycle += 2;
 	uint8_t data = mem_read(r.hl);
-	uint8_t fCarry = static_cast<uint8_t>((r.f & 0x10) == 0x10);
-	uint32_t res = r.a - (data + fCarry);
+	bool fCarry = r.f & 0x10;
+	uint8_t res = r.a - (data + fCarry);
 	setZeroF(res);
 	setSubsF(true);
-	setHCarryFBorrow(r.a, (data + fCarry));
-	setCarryFBorrow(r.a, (data + fCarry));
+	setHCarryFBorrow(r.a, data, fCarry);
+	setCarryFBorrow(r.a, data, fCarry);
 	r.a = res & 0xFF;
 }
 
@@ -836,12 +863,12 @@ void Cpu::SBC_A_n8(uint8_t n8)
 {
 	mCycle += 2;
 
-	uint8_t fCarry = static_cast<uint8_t>((r.f & 0x10) == 0x10);
-	uint32_t res = r.a - (n8 + fCarry);
-	setZeroF(uint8_t(res));
+	bool fCarry = r.f & 0x10;
+	uint8_t res = r.a - (n8 + fCarry);
+	setZeroF(res);
 	setSubsF(true);
-	setHCarryFBorrow(r.a, (n8 + fCarry));
-	setCarryFBorrow(r.a, (n8 + fCarry));
+	setHCarryFBorrow(r.a,n8, fCarry);
+	setCarryFBorrow(r.a, n8, fCarry);
 	r.a = res & 0xFF;
 }
 
@@ -849,7 +876,8 @@ void Cpu::SUB_A_r8(uint8_t& r8)
 {
 	mCycle += 1;
 
-	uint32_t res = r.a - r8;
+	uint8_t res = r.a - r8;
+	setZeroF(res);
 	setSubsF(true);
 	setHCarryFBorrow(r.a, r8);
 	setCarryFBorrow(r.a, r8);
@@ -860,7 +888,8 @@ void Cpu::SUB_A_HL()
 {
 	mCycle += 1;
 	uint8_t data = mem_read(r.hl);
-	uint32_t res = r.a - data;
+	uint8_t res = r.a - data;
+	setZeroF(res);
 	setSubsF(true);
 	setHCarryFBorrow(r.a, data);
 	setCarryFBorrow(r.a, data);
@@ -871,7 +900,8 @@ void Cpu::SUB_A_n8(uint8_t n8)
 {
 	mCycle += 2;
 
-	uint32_t res = r.a - n8;
+	uint8_t res = r.a - n8;
+	setZeroF(res);
 	setSubsF(true);
 	setHCarryFBorrow(r.a, n8);
 	setCarryFBorrow(r.a, n8);
@@ -1363,12 +1393,12 @@ void Cpu::LD_n16_A(uint16_t n16)
 	mem_write(n16, r.a);
 }
 
-void Cpu::LDH_n16_A(uint16_t n16)
+void Cpu::LDH_n16_A(uint8_t n8)
 {
 	mCycle += 3;
 
-	if (n16 <= 0xFFFF && n16 >= 0xFF00)
-		mem_write(n16, r.a);
+	uint16_t n16 = (n8) | 0xFF00;
+	mem_write(n16, r.a);
 }
 
 void Cpu::LDH_C_A()
@@ -1392,11 +1422,11 @@ void Cpu::LD_A_n16(uint16_t n16)
 	r.a = mem_read(n16);
 }
 
-void Cpu::LDH_A_n16(uint16_t n16)
+void Cpu::LDH_A_n16(uint8_t n8)
 {
 	mCycle += 3;
-	if (n16 <= 0xFFFF && n16 >= 0xFF00)
-		r.a = mem_read(n16);
+	uint16_t adr = n8 | 0xFF00;
+	r.a = mem_read(adr);
 }
 
 void Cpu::LDH_A_C()
@@ -1450,10 +1480,13 @@ void Cpu::ADD_SP_e8(int8_t e8)
 	mCycle += 4;
 
 	uint16_t res = sp + e8;
+	uint8_t temp = sp & 0xFF;
+	uint16_t resF = temp + (e8 & 0xFF);
 	r.f &= ~0x80; //setZeroF(res);
 	setSubsF(false);
 	setHCarryF8(sp, e8);
-	setCarryF8(res);
+	setCarryF8(resF);
+	sp = res;
 }
 
 void Cpu::DEC_SP()
@@ -1513,11 +1546,7 @@ void Cpu::POP_AF()
 	r.a = mem_read(sp);
 	++sp;
 
-	uint8_t res = r.f;
-	setZeroF(res & 0x80);
-	setSubsF(res & 0x40);
-	setHCarryF8(res & 0x20);
-	setCarryF8(static_cast<bool>(res & 0x10));
+	r.f &= 0xF0;
 }
 
 void Cpu::POP_r16(uint16_t& r16)
