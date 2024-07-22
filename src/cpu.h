@@ -238,4 +238,7 @@ public: //for unit test
 
 	typedef void (Cpu::* functionPointerHL)();
 	functionPointerHL ALU_r8_HL[8] = { &Cpu::ADD_A_HL, &Cpu::ADC_A_HL, &Cpu::SUB_A_HL, &Cpu::SBC_A_HL, &Cpu::AND_A_HL, &Cpu::XOR_A_HL, &Cpu::OR_A_HL, &Cpu::CP_A_HL };
+
+	functionPointer ROT_r8[8] = { &Cpu::RLC_r8, &Cpu::RRC_r8, &Cpu::RL_r8, &Cpu::RR_r8, &Cpu::SLA_r8, &Cpu::SRA_r8, &Cpu::SWAP_r8, &Cpu::SRL_r8 };
+	functionPointerHL ROT_HL[8] = { &Cpu::RLC_HL, &Cpu::RRC_HL, &Cpu::RL_HL, &Cpu::RR_HL, &Cpu::SLA_HL, &Cpu::SRA_HL, &Cpu::SWAP_HL, &Cpu::SRL_HL };
 };

@@ -16,6 +16,7 @@ void Cpu::fetchOpcode()
 		prefixFlag = true;
 		cb_opcode = mem_read(pc);
 		pc += 1;
+		
 	}
 }
 
@@ -25,16 +26,19 @@ void Cpu::decodeOpcode(uint8_t opcode, uint8_t cb_opcode, bool prefixFlag)
 		opcode = cb_opcode;
 
 	uint8_t x{ 0 }; uint8_t y{ 0 }; uint8_t z{ 0 }; uint8_t p{ 0 }; uint8_t q{ 0 };
-	//
+
 	x = opcode >> 6;
 	y = (opcode & 0b00111000) >> 3;
 	z = (opcode & 0b00000111);
 	p = y >> 1;
 	q = y & 0b00000001;
-	if (prefixFlag == true)
-		executeCBOpcode(x, y, z, p, q);
+
 	if (prefixFlag == false)
 		executeOpcode(x, y, z, p, q);
+	else if (prefixFlag == true)
+		executeCBOpcode(x, y, z, p, q);
+
+		
 }
 
 void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
@@ -412,19 +416,36 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 
 void Cpu::executeCBOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 {
+
 	switch (x)
 	{
-		case 1:
+		case 0:
 			//rot[y] r[z]
+			if (z == 6)
+				(this->*ROT_HL[y])();
+			else
+				(this->*ROT_r8[y])(*rf[z]);
+			break;
+		case 1:
+			//BIT y, r[z]
+			if (z == 6)
+				BIT_u3_HL(y);
+			else
+				BIT_u3_r8(*rf[z], y);
 			break;
 		case 2:
-			//BIT y, r[z]
+			//RES y, r[z]
+			if (z == 6)
+				RES_u3_HL(y);
+			else
+				RES_u3_r8(*rf[z], y);
 			break;
 		case 3:
-			//RES y, r[z]
-			break;
-		case 4:
 			//SET y, r[z]
+			if (z == 6)
+				SET_u3_HL(y);
+			else
+				SET_u3_r8(*rf[z], y);
 			break;
 	}
 }
@@ -791,7 +812,7 @@ void Cpu::INC_HL()
 
 	uint8_t data = mem_read(r.hl);
 	uint16_t res = data + 1;
-	setZeroF(res);
+	setZeroF(uint8_t(res));
 	setSubsF(false);
 	setHCarryF8(data, 1);
 	mem_write(r.hl, res);
@@ -977,7 +998,7 @@ void Cpu::BIT_u3_r8(uint8_t& r8, uint8_t u3)
 	uint16_t res = (r8 & (1 << u3)) != 0;
 	setZeroF(res);
 	setSubsF(false);
-	setHCarryF8(false);
+	setHCarryF8(true);
 }
 
 void Cpu::BIT_u3_HL(uint8_t u3)
@@ -988,7 +1009,7 @@ void Cpu::BIT_u3_HL(uint8_t u3)
 	uint16_t res = (data & (1 << u3)) != 0;
 	setZeroF(res);
 	setSubsF(false);
-	setHCarryF8(false);
+	setHCarryF8(true);
 }
 
 void Cpu::RES_u3_r8(uint8_t& r8, uint8_t u3)
@@ -1056,8 +1077,9 @@ void Cpu::RL_r8(uint8_t& r8)
 	mCycle += 2;
 
 	uint8_t b7 = r8 & 0x80;
+	uint8_t b0 = r.f & 0x10;
 	bool flag = static_cast<bool>(b7);
-	uint8_t res = (r8 << 1);
+	uint8_t res = (r8 << 1) | bool(b0);
 	setZeroF(res);
 	setSubsF(false);
 	setHCarryF8(false);
@@ -1071,8 +1093,9 @@ void Cpu::RL_HL()
 
 	uint8_t data = mem_read(r.hl);
 	uint8_t b7 = data & 0x80;
+	uint8_t b0 = r.f & 0x10;
 	bool flag = static_cast<bool>(b7);
-	uint8_t res = (data << 1);
+	uint8_t res = (data << 1) | bool(b0);
 	setZeroF(res);
 	setSubsF(false);
 	setHCarryF8(false);
@@ -1149,8 +1172,9 @@ void Cpu::RR_r8(uint8_t& r8)
 	mCycle += 2;
 
 	uint8_t b0 = r8 & 0x01;
+	uint8_t b7 = r.f & 0x10;
 	bool flag = static_cast<bool>(b0);
-	uint8_t res = (r8 >> 1);
+	uint8_t res = (r8 >> 1) | (bool(b7) << 7);
 	setZeroF(res);
 	setSubsF(false);
 	setHCarryF8(false);
@@ -1164,8 +1188,9 @@ void Cpu::RR_HL()
 
 	uint8_t data = mem_read(r.hl);
 	uint8_t b0 = data & 0x01;
+	uint8_t b7 = r.f & 0x10;
 	bool flag = static_cast<bool>(b0);
-	uint8_t res = (data >> 1);
+	uint8_t res = (data >> 1) | (bool(b7) << 7);
 	setZeroF(res);
 	setSubsF(false);
 	setHCarryF8(false);
@@ -1523,10 +1548,12 @@ void Cpu::LD_HL_SP_e8(int8_t e8)
 	mCycle += 3;
 
 	uint16_t res = sp + e8;
+	uint8_t temp = sp & 0xFF;
+	uint16_t resF = temp + (e8 & 0xFF);
 	r.f &= ~0x80; //setZeroF(res); need bool overlaod
 	setSubsF(false);
 	setHCarryF8(sp, e8);
-	setCarryF8(res);
+	setCarryF8(resF);
 	r.hl = res;
 }
 
