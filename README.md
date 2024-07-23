@@ -5,6 +5,8 @@
 
 - Complete CPU unit tests
 
+- Achieve cycle accuracy
+
 ## Whats going on
 
 - Partly constructed emulation cycle in terms of CPU
