@@ -3,10 +3,17 @@
 
 ## To-do
 
-- Complete CPU unit tests
+- Complete CPU unit tests (Partly done, Instructions are working as intended)
 
-- Achieve cycle accuracy
+- Achieve cycle accuracy ( Working on it)
 
+- Timer class
+
+- MMU class
+
+- Interrupts
+
+- PPU
 ## Whats going on
 
 - Partly constructed emulation cycle in terms of CPU
