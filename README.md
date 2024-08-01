@@ -22,3 +22,4 @@
 
 - Now need to comple emulation cycle and automate the test loop
 
+- Going to implement tick mechanism soon
