@@ -4,6 +4,7 @@
 #include "register.h"
 #include "instructions.h"
 
+class Timer;
 
 class Cpu
 {
@@ -35,7 +36,8 @@ private:
 	uint16_t* HL = &r.hl;
 	uint8_t vec[8] = {0x00,0x08,0x10,0x18,0x20,0x28,0x30,0x38};
 	
-
+	//
+	void Tick(Timer& timer);
 
 	// flag methods
 
