@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cstdint>
-#include <nlohmann/json.hpp>
+#include <json.hpp>
 #include <string>
 #include <fstream>
 #include <cpu.h>
