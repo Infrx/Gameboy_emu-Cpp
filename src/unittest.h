@@ -72,7 +72,7 @@ void inline unitTest(json& data, Cpu& cpu)
 	}
 }
 
-json openFile(std::string file)
+inline json openFile(const std::string& file)
 {
 	std::ifstream f(file);
 	if (!f.is_open()) {
@@ -83,7 +83,7 @@ json openFile(std::string file)
 	return data;
 }
 
-extern const std::vector<std::string> jsonFiles =
+inline extern const std::vector<std::string> jsonFiles =
 {
         "00.json", "01.json", "02.json", "03.json", "04.json", "05.json", "06.json", "07.json",
         "08.json", "09.json", "0a.json", "0b.json", "0c.json", "0d.json", "0e.json", "0f.json",
