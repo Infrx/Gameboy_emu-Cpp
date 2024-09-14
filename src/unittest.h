@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <cstdint>
 #include <json.hpp>
@@ -7,7 +8,7 @@
 #include <vector>
 using json = nlohmann::json;
 
-void initializeMemory(const std::vector<std::vector<int>>& ramData, Cpu& cpu)
+inline void initializeMemory(const std::vector<std::vector<int>>& ramData, Cpu& cpu)
 {
     for (auto it = ramData.begin(); it != ramData.end(); ++it) {
         const auto& entry = *it;
@@ -34,6 +35,7 @@ void inline unitTest(json& data, Cpu& cpu)
 		cpu.r.l = data[idx]["initial"]["l"];
 		cpu.pc = data[idx]["initial"]["pc"];
 		cpu.sp = data[idx]["initial"]["sp"];
+		cpu.IME = data[idx]["initial"]["ime"];
         std::vector<std::vector<int>> Ram = data[idx]["initial"]["ram"];
         initializeMemory(Ram, cpu);
 		//memidx = data[idx]["initial"]["ram"][0][0];
@@ -69,6 +71,8 @@ void inline unitTest(json& data, Cpu& cpu)
 			std::cout << "pc is wrong at test 0x" << testName << " test no: " << testNo << "/   " << int(cpu.pc) << " != " << data[idx]["final"]["pc"] << std::endl;
 		if (cpu.sp != data[idx]["final"]["sp"])
 			std::cout << "sp is wrong at test 0x" << testName << " test no: " << testNo << "/   " << int(cpu.sp) << " != " << data[idx]["final"]["sp"] << std::endl;
+		if (cpu.IME != data[idx]["final"]["ime"])
+			std::cout << "IME is wrong at test 0x" << testName << " test no: " << testNo << "/   " << int(cpu.IME) << " != " << data[idx]["final"]["ime"] << std::endl;
 	}
 }
 

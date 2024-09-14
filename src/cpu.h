@@ -15,7 +15,8 @@ public:
 	uint8_t memory[65536]{ 0 };
 	uint16_t pc;
 	uint16_t sp;
-	bool IME;
+	uint8_t IME;
+	bool IME_Next;
 	int mCycle;
 	bool prefixFlag;
 	Cpu();
@@ -26,7 +27,7 @@ public:
 	void cycle();
 	Registers r;
 private:
-	uint8_t mem_read(const uint16_t& adr) const;
+	[[nodiscard]] uint8_t mem_read(const uint16_t& adr) const;
 	void mem_write(const uint16_t adr, uint8_t value);
 
 	uint16_t* rp[4] = { &r.bc, &r.de, &r.hl, &sp };

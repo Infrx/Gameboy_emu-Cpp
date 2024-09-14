@@ -1,7 +1,7 @@
 #include "cpu.h"
 
 Cpu::Cpu()
-	:opcode(0), cb_opcode(0), pc(0x0100), sp(0xFFFE), mCycle(0)
+	:opcode(0), cb_opcode(0), pc(0x0100), sp(0xFFFE), IME(0),IME_Next(0), mCycle(0)
 {
 }
 
@@ -11,13 +11,14 @@ void Cpu::fetchOpcode()
 	pc += 1;
 	cb_opcode = 0;
 	prefixFlag = false;
-	if (opcode == 0xCB) 
+	if (opcode == 0xCB)
 	{
 		prefixFlag = true;
 		cb_opcode = mem_read(pc);
 		pc += 1;
-		
 	}
+	if (IME_Next == true)
+		IME = 1;
 }
 
 void Cpu::decodeOpcode(uint8_t opcode, uint8_t cb_opcode, bool prefixFlag)
@@ -323,7 +324,7 @@ void Cpu::executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q)
 					}
 					break;
 				case 2:
-					if (0 >= 0 && y <= 3)
+					if (y >= 0 && y <= 3)
 					{
 						//JP cc[y], nn
 						uint16_t n16 = mem_read(pc++) | (mem_read(pc++) << 8);
@@ -1684,7 +1685,7 @@ void Cpu::DI()
 void Cpu::EI()
 {
 	mCycle += 1;
-	IME = 1;
+	IME_Next = true;
 }
 
 void Cpu::NOP()
@@ -1921,8 +1922,8 @@ void Cpu::RET()
 
 void Cpu::RETI()
 {
-	RET();
 	IME = 1;
+	RET();
 }
 
 void Cpu::RST_vec(uint8_t vec)
