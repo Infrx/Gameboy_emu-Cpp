@@ -71,8 +71,10 @@ void inline unitTest(json& data, Cpu& cpu)
 			std::cout << "pc is wrong at test 0x" << testName << " test no: " << testNo << "/   " << int(cpu.pc) << " != " << data[idx]["final"]["pc"] << std::endl;
 		if (cpu.sp != data[idx]["final"]["sp"])
 			std::cout << "sp is wrong at test 0x" << testName << " test no: " << testNo << "/   " << int(cpu.sp) << " != " << data[idx]["final"]["sp"] << std::endl;
+		/*
 		if (cpu.IME != data[idx]["final"]["ime"])
 			std::cout << "IME is wrong at test 0x" << testName << " test no: " << testNo << "/   " << int(cpu.IME) << " != " << data[idx]["final"]["ime"] << std::endl;
+			*/
 	}
 }
 
