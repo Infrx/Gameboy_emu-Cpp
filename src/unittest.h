@@ -24,7 +24,7 @@ void inline unitTest(json& data, Cpu& cpu)
 {
 	for (int idx = 0; idx < 999; ++idx)
 	{
-		uint16_t memidx = 0;
+		//uint16_t memidx = 0;
 		cpu.r.a = data[idx]["initial"]["a"];
 		cpu.r.b = data[idx]["initial"]["b"];
 		cpu.r.c = data[idx]["initial"]["c"];
@@ -166,3 +166,6 @@ inline extern const std::vector<std::string> jsonFiles =
         "f5.json", "f6.json", "f7.json", "f8.json", "f9.json", "fa.json", "fb.json", "fe.json",
         "ff.json"
 };
+inline extern const std::vector<std::string> blaargRoms = {"offset", "01-special.gb", "02-interrupts.gb",
+	"03-op sp,hl.gb", "04-op r,imm.gb", "05-op rp.gb", "06-ld r,r.gb",
+		"07-jr,jp,call,ret,rst.gb", "08-misc instrs.gb", "09-op r,r.gb", "10-bit ops.gb" , "11-op a,(hl).gb"};

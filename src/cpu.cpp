@@ -1,7 +1,7 @@
 #include "cpu.h"
 
 Cpu::Cpu()
-	:opcode(0), cb_opcode(0), pc(0x0100), sp(0xFFFE), IME(0),IME_Next(0), mCycle(0)
+	:opcode(0), cb_opcode(0), pc(0x0100), sp(0xFFFE), IME(0),IME_Next(false), mCycle(0), prefixFlag(false)
 {
 }
 
@@ -460,10 +460,14 @@ void Cpu::cycle()
 
 uint8_t Cpu::mem_read(const uint16_t& adr) const
 {
+	/*
+	if (adr == 0xFF44)
+		return 0x90;
+	*/
 	return memory[adr & 0xFFFF];
 }
 
-void Cpu::mem_write(const uint16_t adr, uint8_t value)
+void Cpu::mem_write(const uint16_t& adr, const uint8_t& value)
 {
 	memory[adr & 0xFFFF] = value;
 }
@@ -1936,4 +1940,71 @@ void Cpu::RST_vec(uint8_t vec)
 	mem_write(sp, vec);
 	uint16_t res = 0x00 | vec;
 	JP_n16(res);
+}
+
+void Cpu::writeLog() const
+{
+	static bool isFirstWrite = true;
+	std::ofstream logFile;
+
+	if (isFirstWrite)
+	{
+		logFile.open("cpu_log.txt", std::ios_base::trunc);  // Open in truncation mode to clear the file
+		isFirstWrite = false;
+	}
+	else
+	{
+		logFile.open("cpu_log.txt", std::ios_base::app);  // Open in append mode for subsequent writes
+	}
+
+	if (logFile.is_open())
+	{
+		logFile << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
+			<< "A:" << std::setw(2) << static_cast<int>(r.a)
+			<< " F:" << std::setw(2) << static_cast<int>(r.f)
+			<< " B:" << std::setw(2) << static_cast<int>(r.b)
+			<< " C:" << std::setw(2) << static_cast<int>(r.c)
+			<< " D:" << std::setw(2) << static_cast<int>(r.d)
+			<< " E:" << std::setw(2) << static_cast<int>(r.e)
+			<< " H:" << std::setw(2) << static_cast<int>(r.h)
+			<< " L:" << std::setw(2) << static_cast<int>(r.l)
+			<< " SP:" << std::setw(4) << sp
+			<< " PC:" << std::setw(4) << pc
+			<< " PCMEM:" << std::setw(2) << static_cast<int>(memory[pc])
+			<< "," << std::setw(2) << static_cast<int>(memory[pc + 1])
+			<< "," << std::setw(2) << static_cast<int>(memory[pc + 2])
+			<< "," << std::setw(2) << static_cast<int>(memory[pc + 3])
+			<< std::endl;
+	}
+	else
+	{
+		std::cerr << "Unable to open log file!" << std::endl;
+	}
+}
+
+
+std::vector<uint8_t> Cpu::readROM(const std::string& filePath)
+{
+	std::ifstream romFile(filePath, std::ios::binary | std::ios::ate);  // Open in binary mode and go to the end
+	if (!romFile.is_open())
+	{
+		std::cerr << "Error: Could not open file " << filePath << std::endl;
+		return {};
+	}
+
+	// Get the file size
+	std::streamsize fileSize = romFile.tellg();
+	romFile.seekg(0, std::ios::beg);  // Go back to the beginning of the file
+
+	// Create a buffer to store the ROM data
+	std::vector<uint8_t> buffer(fileSize);
+
+	// Read the ROM file into the buffer
+	if (!romFile.read(reinterpret_cast<char*>(buffer.data()), fileSize))
+	{
+		std::cerr << "Error: Could not read the file!" << std::endl;
+		return {};
+	}
+
+	return buffer;  // Return the buffer containing the ROM data
 }

@@ -3,6 +3,9 @@
 #include <iostream>
 #include "register.h"
 #include "instructions.h"
+#include <fstream>
+#include <iomanip>
+#include <vector>
 
 class Timer;
 
@@ -19,16 +22,17 @@ public:
 	bool IME_Next;
 	int mCycle;
 	bool prefixFlag;
-	Cpu();
+
 	void fetchOpcode();
 	void decodeOpcode(uint8_t opcode, uint8_t cb_opcode, bool prefixFlag);
 	void executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q);
 	void executeCBOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q);
 	void cycle();
-	Registers r;
+	Registers r{0xB0, 0x01, 0x13, 0x00, 0xD8, 0x00, 0x4D, 0x01};
+	Cpu();
 private:
 	[[nodiscard]] uint8_t mem_read(const uint16_t& adr) const;
-	void mem_write(const uint16_t adr, uint8_t value);
+	void mem_write(const uint16_t& adr, const uint8_t& value);
 
 	uint16_t* rp[4] = { &r.bc, &r.de, &r.hl, &sp };
 	uint16_t* rp2[4] = { &r.bc, &r.de, &r.hl, &r.af };
@@ -244,4 +248,6 @@ public: //for unit test
 
 	functionPointer ROT_r8[8] = { &Cpu::RLC_r8, &Cpu::RRC_r8, &Cpu::RL_r8, &Cpu::RR_r8, &Cpu::SLA_r8, &Cpu::SRA_r8, &Cpu::SWAP_r8, &Cpu::SRL_r8 };
 	functionPointerHL ROT_HL[8] = { &Cpu::RLC_HL, &Cpu::RRC_HL, &Cpu::RL_HL, &Cpu::RR_HL, &Cpu::SLA_HL, &Cpu::SRA_HL, &Cpu::SWAP_HL, &Cpu::SRL_HL };
+	void writeLog() const;
+	std::vector<uint8_t> readROM(const std::string& filePath);
 };
