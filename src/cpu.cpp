@@ -1,7 +1,9 @@
 #include "cpu.h"
 
+#include <complex.h>
+
 Cpu::Cpu()
-	:opcode(0), cb_opcode(0), pc(0x0100), sp(0xFFFE), IME(0),IME_Next(false), mCycle(0), prefixFlag(false)
+	:opcode(0), cb_opcode(0), pc(0x0100), sp(0xFFFE), IME(0),IME_Next(false), IME_Next_(false), mCycle(0), prefixFlag(false)
 {
 }
 
@@ -18,7 +20,15 @@ void Cpu::fetchOpcode()
 		pc += 1;
 	}
 	if (IME_Next == true)
-		IME = 1;
+	{
+		if (IME_Next_ == true)
+		{
+			IME_Next = false;
+			IME_Next_ = false;
+			IME = 1;
+		}
+	}
+
 }
 
 void Cpu::decodeOpcode(uint8_t opcode, uint8_t cb_opcode, bool prefixFlag)

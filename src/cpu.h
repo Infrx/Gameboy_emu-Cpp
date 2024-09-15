@@ -20,6 +20,7 @@ public:
 	uint16_t sp;
 	uint8_t IME;
 	bool IME_Next;
+	bool IME_Next_;
 	int mCycle;
 	bool prefixFlag;
 
