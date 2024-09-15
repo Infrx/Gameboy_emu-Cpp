@@ -27,6 +27,7 @@ void Cpu::fetchOpcode()
 			IME_Next_ = false;
 			IME = 1;
 		}
+		IME_Next_ = true;
 	}
 
 }
@@ -470,10 +471,9 @@ void Cpu::cycle()
 
 uint8_t Cpu::mem_read(const uint16_t& adr) const
 {
-	/*
 	if (adr == 0xFF44)
 		return 0x90;
-	*/
+
 	return memory[adr & 0xFFFF];
 }
 
@@ -1595,11 +1595,11 @@ void Cpu::POP_r16(uint16_t& r16)
 {
 	mCycle += 3;
 
-	uint8_t lsb = mem_read(sp);
-	++sp;
-	uint8_t msb = mem_read(sp);
-	++sp;
 
+	uint16_t lsb = mem_read(sp);
+	++sp;
+	uint16_t msb = mem_read(sp);
+	++sp;
 	r16 = (msb << 8) | lsb;
 }
 
@@ -1694,6 +1694,8 @@ void Cpu::DI()
 {
 	mCycle += 1;
 	IME = 0;
+	IME_Next = false;
+	IME_Next_ = false;
 }
 
 void Cpu::EI()
@@ -1723,13 +1725,13 @@ void Cpu::STOP()
 
 void Cpu::CALL_n16(uint16_t n16)
 {
-	mCycle += 6;
+	mCycle += 2;
 	uint8_t data1 = static_cast<uint8_t>(n16 >> 8);
 	uint8_t data2 = static_cast<uint8_t>((n16 << 8) >> 8);
 	--sp;
-	mem_write(sp, data1);
+	mem_write(sp, pc >> 8);
 	--sp;
-	mem_write(sp, data2);
+	mem_write(sp, pc & 0xFF);
 	JP_n16(n16);
 }
 
@@ -1745,9 +1747,9 @@ void Cpu::CALL_cc_n16(uint8_t cc, uint16_t n16)
 		if ((r.f & 0x80) == 0x80)
 		{
 			--sp;
-			mem_write(sp, data1);
+			mem_write(sp, pc >> 8);
 			--sp;
-			mem_write(sp, data2);
+			mem_write(sp, pc & 0xFF);
 			JP_n16(n16);
 		}
 	}
@@ -1756,9 +1758,9 @@ void Cpu::CALL_cc_n16(uint8_t cc, uint16_t n16)
 		if ((r.f & 0x80) == 0)
 		{
 			--sp;
-			mem_write(sp, data1);
+			mem_write(sp, pc >> 8);
 			--sp;
-			mem_write(sp, data2);
+			mem_write(sp, pc & 0xFF);
 			JP_n16(n16);
 		}
 	}
@@ -1767,9 +1769,9 @@ void Cpu::CALL_cc_n16(uint8_t cc, uint16_t n16)
 		if ((r.f & 0x10) == 0x10)
 		{
 			--sp;
-			mem_write(sp, data1);
+			mem_write(sp, pc >> 8);
 			--sp;
-			mem_write(sp, data2);
+			mem_write(sp, pc & 0xFF);
 			JP_n16(n16);
 		}
 	}
@@ -1778,9 +1780,9 @@ void Cpu::CALL_cc_n16(uint8_t cc, uint16_t n16)
 		if ((r.f & 0x10) == 0)
 		{
 			--sp;
-			mem_write(sp, data1);
+			mem_write(sp, pc >> 8);
 			--sp;
-			mem_write(sp, data2);
+			mem_write(sp, pc & 0xFF);
 			JP_n16(n16);
 		}
 	}
@@ -1800,7 +1802,6 @@ void Cpu::JP_n16(uint16_t n16)
 	mCycle += 4;
 
 	pc = n16;
-
 }
 
 void Cpu::JP_cc_n16(uint8_t cc, uint16_t n16)

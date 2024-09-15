@@ -4,17 +4,23 @@
 int main()
 {
 	Cpu cpu;
-	auto buffer = cpu.readROM("roms/" + blaargRoms[1]);
+	auto buffer = cpu.readROM("roms/" + blaargRoms[2]);
 	for (int i = 0; i<buffer.size(); i++)
 	{
 		cpu.memory[i] = buffer[i];
-		std:
 	}
-	cpu.writeLog();
+	//json data = openFile("v1/cd.json");
+	//unitTest(data, cpu);
+	//cpu.writeLog();
+	long int counter{};
 	while(true)
 	{
-		cpu.cycle();
+		++counter;
+		if (counter == 3500000)
+			break;
 		cpu.writeLog();
+		cpu.cycle();
+
 	}
 	/*
 	for (int i = 0; i < 500; ++i)
