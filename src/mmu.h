@@ -7,12 +7,12 @@
 #include <array>
 #include <cstdint>
 
-const int ROM_BANK_SIZE = 0x4000;
-const int VRAM_SIZE = 0x2000;
-const int ERAM_SIZE = 0x2000;
-const int WRAM_SIZE = 0x2000;
-const int OAM_SIZE = 0x9F;
-const int HRAM_SIZE = 0x7F;
+constexpr int ROM_BANK_SIZE = 0x4000;
+constexpr int VRAM_SIZE = 0x2000;
+constexpr int ERAM_SIZE = 0x2000;
+constexpr int WRAM_SIZE = 0x2000;
+constexpr int OAM_SIZE = 0x9F;
+constexpr int HRAM_SIZE = 0x7F;
 
 
 class MMU
