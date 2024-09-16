@@ -13,6 +13,8 @@ add_library(MyLibrary STATIC
         src/instructions.cpp
         src/register.cpp
         src/timer.cpp
+        src/mmu.cpp
+        src/mmu.h
 )
 
 # Add the main executable
