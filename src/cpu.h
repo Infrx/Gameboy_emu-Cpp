@@ -1,8 +1,6 @@
 #pragma once
 #include <cstdint>
-#include <iostream>
 #include "register.h"
-#include "instructions.h"
 #include <fstream>
 #include <iomanip>
 #include <vector>
