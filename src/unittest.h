@@ -4,7 +4,8 @@
 #include <json.hpp>
 #include <string>
 #include <fstream>
-#include <cpu.h>
+#include "cpu.h"
+#include "mmu.h"
 #include <vector>
 using json = nlohmann::json;
 

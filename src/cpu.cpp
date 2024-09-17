@@ -2,9 +2,11 @@
 
 #include <complex.h>
 
-Cpu::Cpu()
-	:opcode(0), cb_opcode(0), pc(0x0100), sp(0xFFFE), IME(0),IME_Next(false), IME_Next_(false), mCycle(0), prefixFlag(false)
+Cpu::Cpu(MMU& mmu)
+	: opcode(0), cb_opcode(0), pc(0x0100), sp(0xFFFE), IME(0), IME_Next(false), IME_Next_(false), mCycle(0),
+	  prefixFlag(false), mmu(mmu)
 {
+	mmu = MMU([this]() { incrementMCycle(); });
 }
 
 void Cpu::fetchOpcode()
@@ -466,6 +468,11 @@ void Cpu::cycle()
 {
 	fetchOpcode();
 	decodeOpcode(opcode, cb_opcode, prefixFlag);
+}
+
+void Cpu::incrementMCycle()
+{
+	++mCycle;
 }
 
 

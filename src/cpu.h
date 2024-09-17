@@ -6,9 +6,9 @@
 #include <fstream>
 #include <iomanip>
 #include <vector>
-
+#include "mmu.h"
 class Timer;
-
+class MMU;
 class Cpu
 {
 public:
@@ -29,12 +29,13 @@ public:
 	void executeOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q);
 	void executeCBOpcode(uint8_t x, uint8_t y, uint8_t z, uint8_t p, uint8_t q);
 	void cycle();
+	void incrementMCycle();
 	Registers r{0xB0, 0x01, 0x13, 0x00, 0xD8, 0x00, 0x4D, 0x01};
-	Cpu();
+	explicit Cpu(MMU& mmu);
 private:
 	[[nodiscard]] uint8_t mem_read(const uint16_t& adr) const;
 	void mem_write(const uint16_t& adr, const uint8_t& value);
-
+	MMU& mmu;
 	uint16_t* rp[4] = { &r.bc, &r.de, &r.hl, &sp };
 	uint16_t* rp2[4] = { &r.bc, &r.de, &r.hl, &r.af };
 	//uint8_t rf[8] = {r.b, r.c, r.d, r.e, r.h, r.l, 0, r.a}; //is placeholder for (HL)

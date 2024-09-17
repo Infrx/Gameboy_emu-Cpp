@@ -3,7 +3,9 @@
 
 int main()
 {
-	Cpu cpu;
+	MMU mmu([]() {});
+	Cpu cpu(mmu);
+	mmu = MMU([&cpu]() { cpu.incrementMCycle(); });
 	auto buffer = cpu.readROM("roms/" + blaargRoms[2]);
 	for (int i = 0; i<buffer.size(); i++)
 	{
@@ -20,6 +22,7 @@ int main()
 			break;
 		cpu.writeLog();
 		cpu.cycle();
+
 
 	}
 	/*

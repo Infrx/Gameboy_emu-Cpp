@@ -6,6 +6,8 @@
 #define MMU_H
 #include <array>
 #include <cstdint>
+#include <functional>
+#include "cpu.h"
 
 constexpr int ROM_BANK_SIZE = 0x4000;
 constexpr int VRAM_SIZE = 0x2000;
@@ -24,9 +26,11 @@ public:
     std::array<uint8_t, OAM_SIZE> oam;
     std::array<uint8_t, HRAM_SIZE> hram;
 public:
-    MMU();
+    explicit MMU(const std::function<void()>& incrementMCycle);
     [[nodiscard]] uint8_t read(const uint16_t& adr) const;
     void write(const uint16_t& adr, const uint8_t& value);
+private:
+    std::function<void()> incrementMCycle;
 };
 
 
