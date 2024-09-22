@@ -12,9 +12,11 @@ MMU::MMU(const std::function<void()>& incrementMCycle)
 uint8_t MMU::read(const uint16_t& adr) const
 {
     incrementMCycle();
-    return 0;
+    return memory[adr];
 }
 
 void MMU::write(const uint16_t& adr, const uint8_t& value)
 {
+    incrementMCycle();
+    memory[adr] = value;
 }

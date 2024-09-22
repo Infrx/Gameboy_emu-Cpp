@@ -15,16 +15,19 @@ constexpr int ERAM_SIZE = 0x2000;
 constexpr int WRAM_SIZE = 0x2000;
 constexpr int OAM_SIZE = 0x9F;
 constexpr int HRAM_SIZE = 0x7F;
+constexpr int MEMORY = 0xFFFF;
+
 
 
 class MMU
 {
 public:
-    std::array<uint8_t, VRAM_SIZE> vram;
-    std::array<uint8_t, ERAM_SIZE> eram;
-    std::array<uint8_t, WRAM_SIZE> wram;
-    std::array<uint8_t, OAM_SIZE> oam;
-    std::array<uint8_t, HRAM_SIZE> hram;
+    std::array<uint8_t, VRAM_SIZE> vram{};
+    std::array<uint8_t, ERAM_SIZE> eram{};
+    std::array<uint8_t, WRAM_SIZE> wram{};
+    std::array<uint8_t, OAM_SIZE> oam{};
+    std::array<uint8_t, HRAM_SIZE> hram{};
+    std::array<uint8_t, MEMORY> memory{};
 public:
     explicit MMU(const std::function<void()>& incrementMCycle);
     [[nodiscard]] uint8_t read(const uint16_t& adr) const;
